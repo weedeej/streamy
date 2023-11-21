@@ -4,4 +4,5 @@ export enum MovieQuality {
   The3D = "3D",
   The720P = "720p",
   The480P = "480p",
+  ALL = "all"
 }
