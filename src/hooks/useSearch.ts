@@ -1,16 +1,31 @@
-import { ytsConfig } from "@/constants";
+import { defaultQueryParam, ytsConfig } from "@/constants";
+import { ListMoviesParam, YTSQueryResponse } from "@/types";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-export function useSearch() {
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  
-  function search(query: string) {
-    setSearchQuery(query);
+export function useSearch(): [(key: keyof typeof query, value: any) => void, () => Promise<void>, YTSQueryResponse | null] {
+  const [query, setQuery] = useState<ListMoviesParam>(defaultQueryParam);
+  const [searchResult, setSearchResult] = useState<YTSQueryResponse | null>(null);
+
+  function updateQuery(key: keyof typeof query, value: any) {
+    setQuery({...query, [key]: value});
   }
 
-  useEffect(() => {
-    if (!searchQuery) return;
-    const url = `${ytsConfig.baseUrl}/list_movies.json`
-  }, [searchQuery]);
+  function buildQuery() {
+    return Object.entries(query).map(([k,v]) => `${k}=${v}`).join("&");
+  }
+
+  async function search() {
+    const url = `${ytsConfig.baseUrl}/list_movies.json?${buildQuery()}`
+    let response = null;
+    try {
+      response = (await axios.get<YTSQueryResponse>(url)).data;
+    } catch (e) {
+      alert("An error has occured. Contact Developer");
+      console.error(e);
+    }
+    setSearchResult(response);
+  }
+
+  return [updateQuery, search, searchResult]
 }
