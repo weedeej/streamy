@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./auth/authSlice";
 import watchListReducer from "./watchList/watchListSlice";
+import trackerListReducer from "./trackerList/trackerListSlice";
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    watchList: watchListReducer
+    watchList: watchListReducer,
+    trackerList: trackerListReducer
   }
 });
 

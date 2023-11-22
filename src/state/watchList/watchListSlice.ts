@@ -10,7 +10,7 @@ const initialState: watchListState = {
 }
 
 const watchListSlice = createSlice({
-  name: "auth",
+  name: "watchList",
   initialState,
   reducers: {
     addMovie: (state, action: PayloadAction<Movie>) => {

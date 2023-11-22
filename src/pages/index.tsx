@@ -1,16 +1,24 @@
 import { MovieCard } from "@/components";
 import { useSearch } from "@/hooks";
+import { RootState } from "@/state/store";
+import { setTrackers } from "@/state/trackerList/trackerListSlice";
+import { getTrackers } from "@/utils";
 import { Search } from "@mui/icons-material";
 import { Button, Paper, Stack, TextField, Typography } from "@mui/material";
 import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function Home() {
   const [updateQuery, search, searchResult] = useSearch();
+  const isTrackerListDefault = useSelector((state: RootState) => state.trackerList.default);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    if (!searchResult) return;
-    console.log(searchResult);
-  }, [searchResult]);
+    if (!isTrackerListDefault) return;
+    getTrackers().then((trackers) => {
+      dispatch(setTrackers(trackers))
+    });
+  }), [];
 
   return (
     <Stack gap={2}>
