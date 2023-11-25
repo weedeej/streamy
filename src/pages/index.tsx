@@ -4,33 +4,30 @@ import { RootState } from "@/state/store";
 import { setTrackers } from "@/state/trackerList/trackerListSlice";
 import { getTrackers } from "@/utils";
 import { AccountCircle, Login, Mail, Menu, Notifications, Search } from "@mui/icons-material";
-import { AppBar, Badge, Box, Button, IconButton, Paper, Stack, TextField, Toolbar, Typography } from "@mui/material";
+import { AppBar, Badge, Box, Button, CircularProgress, IconButton, Paper, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function Home() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
-
+  const [query, setQuery] = useState<string>("");
   const [updateQuery, search, searchResult] = useSearch();
-  const isTrackerListDefault = useSelector((state: RootState) => state.trackerList.default);
   const user = useSelector((state: RootState) => state.auth.user);
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (!isTrackerListDefault) return;
-    getTrackers().then((trackers) => {
-      dispatch(setTrackers(trackers))
-    });
-  }), [];
+  const initialMovies = useSelector((state: RootState) => state.homePageMov.movies);
 
   function onLoginClick() {
     setIsLoginModalOpen(true);
   }
 
+  function onQueryUpdate(e: React.ChangeEvent<HTMLInputElement>) {
+    updateQuery("query_term", e.target.value);
+    setQuery(() => query);
+  }
+
   return (
     <>
-    <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)}/>
-      <Stack gap={2}>
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
+      <Stack gap={2} minHeight="100vh">
         <AppBar position="static">
           <Toolbar sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
             <IconButton
@@ -73,7 +70,7 @@ export default function Home() {
                   color: "white"
                 }
               }}
-              onChange={(e) => updateQuery("query_term", e.target.value)}
+              onChange={onQueryUpdate}
               placeholder="Search" />
             <Box sx={{ flexGrow: 1 }} />
             <Stack direction="row" gap={2}>
@@ -88,21 +85,49 @@ export default function Home() {
             </Stack>
           </Toolbar>
         </AppBar>
-        <Stack p={2} direction="row" flexWrap="wrap" gap={2} alignItems="stretch" justifyContent="space-evenly">
-          {
-            (searchResult !== null) ? (
-              searchResult.data.movie_count < 1 ? "No results found" : (
-                searchResult.data.movies.map((movie) => <MovieCard key={movie.id} movie={movie} />)
+        {
+          (query) ? (searchResult !== null) && (
+            searchResult.data.movie_count < 1 ? (
+              <Typography variant="h4" textAlign="center">
+                No results found for: "{query}"
+              </Typography>
+            ) : (
+              <Stack p={2} direction="row" flexWrap="wrap" gap={2} alignItems="stretch" justifyContent="space-evenly" height="100%">
+                {
+                  searchResult.data.movies.map((movie) => <MovieCard key={movie.id} movie={movie} />)
+                }
+              </Stack>
+            )
+          ) : (
+            initialMovies === null ? (
+              (
+                <Stack p={8} direction="row" justifyContent="center">
+                  <CircularProgress/>
+                </Stack>
               )
             ) : (
-              <>dmca</>
+              (
+                <Stack p={2} direction="row" flexWrap="wrap" gap={2} alignItems="stretch" justifyContent="space-evenly" height="100%">
+                  {
+                    initialMovies.map((movie) => <MovieCard key={movie.id} movie={movie} />)
+                  }
+                </Stack>
+              )
             )
-          }
+          )
+        }
+        <Stack alignItems="center" justifySelf="end" p={4}>
+          <Typography variant="h5">
+            FOR DMCA
+          </Typography>
+          <Typography variant="body2" fontWeight={700}>
+            I am writing to affirm that all content hosted on this website is made available solely for educational purposes and is sourced from publicly accessible information. As the administrator of the site, I am committed to upholding copyright laws and respecting intellectual property rights.
+
+            In the event that any content on this platform is identified as infringing upon copyright or violating intellectual property rights, I encourage and welcome prompt communication for its removal. Please reach out to me at <i><u>work.deeej@gmail.com</u></i> to address any concerns regarding copyrighted materials. I assure you that swift action will be taken to investigate and, if necessary, remove the contentious content to comply with copyright regulations.
+
+            Thank you for your attention to this matter. I am dedicated to maintaining a platform that adheres to legal standards and encourages the dissemination of knowledge for educational purposes while respecting intellectual property rights.
+          </Typography>
         </Stack>
-        {/* <form onSubmit={onSearch}>
-        <input onChange={(e) => updateQuery("query_term", e.target.value)}/>
-        <input type="submit"/>
-      </form> */}
       </Stack>
     </>
   )
