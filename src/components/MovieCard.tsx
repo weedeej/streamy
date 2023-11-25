@@ -18,6 +18,7 @@ export function MovieCard({ movie }: { movie: Movie }) {
 
   useEffect(() => {
     if (downloadLinks) return;
+    setDownloadLinks((prev) => ({magnets: [], torrents: []}));
     torrents.forEach((torrent) => {
       const { hash, type, quality, size, url: torrentFile } = torrent;
       const magnet = createMagnetLink(hash, title_long, trackerList);
