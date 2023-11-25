@@ -22,13 +22,13 @@ export function LoginModal(props: LoginModalProps) {
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        width: 400,
+        minWidth: 300,
         p: 4,
       }}>
         <Stack direction="column" justifyContent="space-between" alignItems="center" gap={2}>
           <Stack direction="row" width="100%" justifyContent="space-between" alignItems="center">
             <Typography variant="button" fontWeight={700}>{actionMode} to Streamy</Typography>
-            <IconButton>
+            <IconButton onClick={onClose}>
               <Close />
             </IconButton>
           </Stack>
@@ -42,7 +42,7 @@ export function LoginModal(props: LoginModalProps) {
               <Typography variant="h6">OR</Typography>
             </Divider>
             <Stack direction="column" gap={2} width="100%">
-              <TextField type="email" name="email" size="small" label="Email" />
+              <TextField type="email" name="email" size="small" label="Email"/>
               <Stack gap={0} width="100%">
                 <TextField type="password" name="password" size="small" label="Password" />
                 <Stack direction="row" justifyContent="space-between">
