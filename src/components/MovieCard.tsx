@@ -4,6 +4,7 @@ import { Movie } from "@/types";
 import { createMagnetLink } from "@/utils";
 import { Download, ExpandMore, Link } from "@mui/icons-material";
 import { Button, Card, CardActions, CardContent, CardMedia, Divider, ListItemIcon, ListItemText, Menu, MenuItem, MenuList, Typography } from "@mui/material";
+import React from "react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
@@ -79,7 +80,7 @@ export function MovieCard({ movie }: { movie: Movie }) {
                   <ListItemText>{link.label}</ListItemText>
                 </MenuItem>
               )),
-              <Divider />,
+              <Divider key={Math.random()}/>,
               ...downloadLinks.torrents.map((link) => (
                 <MenuItem key={`torrent_link_${link.url}`} onClick={() => onTorrentClick(link)}>
                   <ListItemIcon>

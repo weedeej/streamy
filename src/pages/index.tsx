@@ -89,7 +89,7 @@ export default function Home() {
           (query) ? (searchResult !== null) && (
             searchResult.data.movie_count < 1 ? (
               <Typography variant="h4" textAlign="center">
-                No results found for: "{query}"
+                No results found for: &quot;{query}&quot;
               </Typography>
             ) : (
               <Stack p={2} direction="row" flexWrap="wrap" gap={2} alignItems="stretch" justifyContent="space-evenly" height="100%">
