@@ -44,7 +44,7 @@ export default function Home() {
               component="div"
               sx={{ display: { xs: 'none', sm: 'block' } }}
             >
-              STREAMY
+              SSTREAMY
             </Typography>
             <TextField
               variant="outlined"

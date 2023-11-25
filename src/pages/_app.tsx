@@ -9,7 +9,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>Streamy - Download Movies in Torrent</title>
+        <title>SStreamy - Download Movies in Torrent</title>
       </Head>
       <Provider store={store}>
         <StoreValuesProvider>

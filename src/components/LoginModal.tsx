@@ -27,7 +27,7 @@ export function LoginModal(props: LoginModalProps) {
       }}>
         <Stack direction="column" justifyContent="space-between" alignItems="center" gap={2}>
           <Stack direction="row" width="100%" justifyContent="space-between" alignItems="center">
-            <Typography variant="button" fontWeight={700}>{actionMode} to Streamy</Typography>
+            <Typography variant="button" fontWeight={700}>{actionMode} to SStreamy</Typography>
             <IconButton onClick={onClose}>
               <Close />
             </IconButton>
