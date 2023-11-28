@@ -1,15 +1,15 @@
 import { LoginModal, MovieCard } from "@/components";
+import { HelpModal } from "@/components/HelpModal";
 import { useSearch } from "@/hooks";
 import { RootState } from "@/state/store";
-import { setTrackers } from "@/state/trackerList/trackerListSlice";
-import { getTrackers } from "@/utils";
-import { AccountCircle, Login, Mail, Menu, Notifications, Search } from "@mui/icons-material";
-import { AppBar, Badge, Box, Button, CircularProgress, IconButton, Paper, Stack, TextField, Toolbar, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { AccountCircle, HelpOutline, Login, Menu, Search } from "@mui/icons-material";
+import { AppBar, Badge, Box, Button, CircularProgress, IconButton, Stack, TextField, Toolbar, Typography } from "@mui/material";
+import { useState } from "react";
+import { useSelector } from "react-redux";
 
 export default function Home() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState<boolean>(false);
   const [query, setQuery] = useState<string>("");
   const [updateQuery, search, searchResult] = useSearch();
   const user = useSelector((state: RootState) => state.auth.user);
@@ -24,9 +24,14 @@ export default function Home() {
     setQuery(() => query);
   }
 
+  function onHelpModalClick() {
+    setIsHelpModalOpen(true);
+  }
+
   return (
     <>
       <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
+      <HelpModal isOpen={isHelpModalOpen} onClose={() => setIsHelpModalOpen(false)} />
       <Stack gap={2} minHeight="100vh">
         <AppBar position="static">
           <Toolbar sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
@@ -77,8 +82,18 @@ export default function Home() {
               <IconButton
                 size="large"
                 edge="end"
+                onClick={onHelpModalClick}
+                color="inherit"
+                title="Help"
+              >
+                <HelpOutline/>
+              </IconButton>
+              <IconButton
+                size="large"
+                edge="end"
                 onClick={onLoginClick}
                 color="inherit"
+                title="Login"
               >
                 {user ? <AccountCircle /> : <Login />}
               </IconButton>
