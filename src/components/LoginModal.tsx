@@ -3,6 +3,7 @@ import { useForm } from "@/hooks";
 import { setUser } from "@/state/auth/authSlice";
 import { RootState } from "@/state/store";
 import { StreamyUser } from "@/types";
+import { showToast } from "@/utils";
 import { Close, Google, Key } from "@mui/icons-material";
 import { Button, CircularProgress, Divider, IconButton, Link, Modal, Paper, Stack, TextField, Typography } from "@mui/material";
 import { GoogleAuthProvider, signInWithRedirect, createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth";
@@ -48,7 +49,7 @@ export function LoginModal(props: LoginModalProps) {
       }).catch((r) => {
         if (r.code === "auth/email-already-in-use") {
           setIsSigningIn(false);
-          alert("Email already in use");
+          showToast("Email already in use", "error")
           return;
         }
         alert(r)

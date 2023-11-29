@@ -1,9 +1,11 @@
 import '@/styles/globals.css'
+import "react-toastify/dist/ReactToastify.css";
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import { Provider } from 'react-redux';
 import { store } from "@/state/store";
 import { StoreValuesProvider } from '@/components';
+import { ToastContainer } from 'react-toastify';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -14,6 +16,17 @@ export default function App({ Component, pageProps }: AppProps) {
       <Provider store={store}>
         <StoreValuesProvider>
           <Component {...pageProps} />
+          <ToastContainer
+            position="bottom-center"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light" />
         </StoreValuesProvider>
       </Provider>
     </>
