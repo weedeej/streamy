@@ -2,6 +2,7 @@ import { LoginModal, MovieCard, HelpModal, UserDrawer } from "@/components";
 import { authClient } from "@/firebaseConfig/firebase";
 import { useSearch } from "@/hooks";
 import { RootState } from "@/state/store";
+import { Movie, YTSQueryResponse } from "@/types";
 import { AccountCircle, HelpOutline, Login, Menu, Search } from "@mui/icons-material";
 import { AppBar, Badge, Box, Button, CircularProgress, IconButton, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useState } from "react";
@@ -13,6 +14,7 @@ export default function Home() {
   const [isUserDrawerOpen, setIsUserDrawerOpen] = useState<boolean>(false);
 
   const [query, setQuery] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
   const [updateQuery, search, searchResult] = useSearch();
   const user = useSelector((state: RootState) => state.auth.user);
   const initialMovies = useSelector((state: RootState) => state.homePageMov.movies);
@@ -23,7 +25,7 @@ export default function Home() {
 
   function onQueryUpdate(e: React.ChangeEvent<HTMLInputElement>) {
     updateQuery("query_term", e.target.value);
-    setQuery(() => query);
+    setQuery(() => e.target.value);
   }
 
   function onHelpModalClick() {
@@ -36,7 +38,7 @@ export default function Home() {
 
   return (
     <>
-      <UserDrawer isOpen={isUserDrawerOpen} onClose={() => setIsUserDrawerOpen(false)}/>
+      <UserDrawer isOpen={isUserDrawerOpen} onClose={() => setIsUserDrawerOpen(false)} />
       <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
       <HelpModal isOpen={isHelpModalOpen} onClose={() => setIsHelpModalOpen(false)} />
       <Stack gap={2} minHeight="100vh">
@@ -75,7 +77,8 @@ export default function Home() {
                 startAdornment: <Search style={{ stroke: "white", fill: "white" }} />,
                 onKeyUp: (e) => {
                   if (e.code === "Enter") {
-                    search();
+                    setIsLoading(true);
+                    search().then(() => setIsLoading(false))
                   }
                 },
                 sx: {
@@ -93,7 +96,7 @@ export default function Home() {
                 color="inherit"
                 title="Help"
               >
-                <HelpOutline/>
+                <HelpOutline />
               </IconButton>
               <IconButton
                 size="large"
@@ -107,37 +110,9 @@ export default function Home() {
             </Stack>
           </Toolbar>
         </AppBar>
-        {
-          (query) ? (searchResult !== null) && (
-            searchResult.data.movie_count < 1 ? (
-              <Typography variant="h4" textAlign="center">
-                No results found for: &quot;{query}&quot;
-              </Typography>
-            ) : (
-              <Stack p={2} direction="row" flexWrap="wrap" gap={2} alignItems="stretch" justifyContent="space-evenly" height="100%">
-                {
-                  searchResult.data.movies.map((movie) => <MovieCard key={movie.id} movie={movie} />)
-                }
-              </Stack>
-            )
-          ) : (
-            initialMovies === null ? (
-              (
-                <Stack p={8} direction="row" justifyContent="center">
-                  <CircularProgress/>
-                </Stack>
-              )
-            ) : (
-              (
-                <Stack p={2} direction="row" flexWrap="wrap" gap={2} alignItems="stretch" justifyContent="space-evenly" height="100%">
-                  {
-                    initialMovies.map((movie) => <MovieCard key={movie.id} movie={movie} />)
-                  }
-                </Stack>
-              )
-            )
-          )
-        }
+        <Stack p={2} direction="row" flexWrap="wrap" gap={2} alignItems="stretch" justifyContent="space-evenly" height="100%">
+          <MainContent isLoading={isLoading} query={query} result={searchResult} initialMovies={initialMovies}/>
+        </Stack>
         <Stack alignItems="center" justifySelf="end" p={4}>
           <Typography variant="h5">
             FOR DMCA
@@ -153,4 +128,32 @@ export default function Home() {
       </Stack>
     </>
   )
+}
+
+function MainContent(props: { query: string, result: YTSQueryResponse | null, initialMovies: Movie[] | null, isLoading: boolean }) {
+  const { query, result, initialMovies, isLoading } = props;
+  console.log(query)
+  if (query) {
+    if (result !== null) {
+      if (result.data.movie_count < 1) {
+        return (
+          <Typography variant="h4" textAlign="center">
+            No results found for: &quot;{query}&quot;
+          </Typography>
+        )
+      } else {
+        return result.data.movies.map((movie) => <MovieCard key={movie.id} movie={movie} />)
+      }
+    }
+  } else {
+    if (!initialMovies || isLoading) {
+      return (
+        <Stack p={8} direction="row" justifyContent="center">
+          <CircularProgress />
+        </Stack>
+      )
+    } else {
+      return initialMovies.map((movie) => <MovieCard key={movie.id} movie={movie} />);
+    }
+  }
 }
