@@ -1,10 +1,12 @@
+import { authClient, firestoreClient } from "@/firebaseConfig/firebase";
 import { RootState } from "@/state/store";
 import { addMovie, removeMovie } from "@/state/watchList/watchListSlice";
 import { theme } from "@/styles";
 import { Movie } from "@/types";
 import { createMagnetLink, showToast } from "@/utils";
 import { Add, Download, ExpandMore, Link, Remove } from "@mui/icons-material";
-import { Button, Card, CardActions, CardContent, CardMedia, Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, MenuList, Typography } from "@mui/material";
+import { Button, Card, CardActions, CardContent, CardMedia, CircularProgress, Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, MenuList, Typography } from "@mui/material";
+import { deleteDoc, doc, setDoc, updateDoc } from "firebase/firestore";
 import React from "react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,19 +20,21 @@ export function MovieCard({ movie }: { movie: Movie }) {
   const user = useSelector((state: RootState) => state.auth.user);
   const watchList = useSelector((state: RootState) => state.watchList.watchList);
   const [onWatchList, setIsOnWatchList] = useState<boolean>(false);
+  const [isWatchListActionLoading, setIsWatchListActionLoading] = useState(false);
   const dispatch = useDispatch();
 
   const [torrentsAnchorEl, setTorrentsAnchorEl] = useState<HTMLElement | null>(null);
   const [downloadLinks, setDownloadLinks] = useState<{ magnets: DownloadLink[], torrents: DownloadLink[] } | null>(null)
 
+  // action button effect
   useEffect(() => {
-    setIsOnWatchList(!!watchList.find((m) => m.id === id))
+    setIsOnWatchList(!!watchList.find((m) => m.id === id));
   }, [watchList]);
 
   // effect for links
   useEffect(() => {
     if (downloadLinks) return;
-    setDownloadLinks((prev) => ({magnets: [], torrents: []}));
+    setDownloadLinks((prev) => ({ magnets: [], torrents: [] }));
     torrents.forEach((torrent) => {
       const { hash, type, quality, size, url: torrentFile } = torrent;
       const magnet = createMagnetLink(hash, title_long, trackerList);
@@ -59,11 +63,21 @@ export function MovieCard({ movie }: { movie: Movie }) {
   }
 
   function addOrRemoveFromWatchList() {
+    if (!user) return showToast("Must be logged-in to use watch list", "error");
+
+    const docRef = doc(firestoreClient, `/users/${user._id}/watchList/${id}`);
+    setIsWatchListActionLoading(true);
     if (onWatchList) {
-      dispatch(removeMovie({id, title: title_long}));
+      deleteDoc(docRef).then(() => {
+        showToast(`${title_long} has been removed from watch list`, "error");
+        setIsWatchListActionLoading(false);
+      });
       return;
     }
-    dispatch(addMovie(movie));
+    setDoc(docRef, movie).then(() => {
+      showToast(`${title_long} has been added to watch list`, "success");
+      setIsWatchListActionLoading(false);
+    });
   }
 
   return (
@@ -85,8 +99,14 @@ export function MovieCard({ movie }: { movie: Movie }) {
           <Button variant="contained" onClick={onDownloadsClick} endIcon={<ExpandMore />}>
             Download
           </Button>
-          <IconButton onClick={addOrRemoveFromWatchList}>
-            {onWatchList ? <Remove/> : <Add/>}
+          <IconButton onClick={addOrRemoveFromWatchList} disabled={isWatchListActionLoading}>
+            {
+              isWatchListActionLoading ? <CircularProgress size={24} /> : (
+                onWatchList ?
+                  <Remove /> :
+                  <Add />
+              )
+            }
           </IconButton>
         </CardActions>
       </Card>
@@ -102,7 +122,7 @@ export function MovieCard({ movie }: { movie: Movie }) {
                   <ListItemText>{link.label}</ListItemText>
                 </MenuItem>
               )),
-              <Divider key={Math.random()}/>,
+              <Divider key={Math.random()} />,
               ...downloadLinks.torrents.map((link) => (
                 <MenuItem key={`torrent_link_${link.url}`} onClick={() => onTorrentClick(link)}>
                   <ListItemIcon>

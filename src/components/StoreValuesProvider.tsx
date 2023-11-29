@@ -3,11 +3,12 @@ import { setUser } from "@/state/auth/authSlice";
 import { setHomePageMov } from "@/state/homePageMov/homePageMovSlice";
 import { RootState } from "@/state/store";
 import { setTrackers } from "@/state/trackerList/trackerListSlice";
-import { StreamyUser } from "@/types";
+import { setWatchList } from "@/state/watchList/watchListSlice";
+import { Movie, StreamyUser } from "@/types";
 import { getInitialMovies, getTrackers, showToast } from "@/utils";
 import { Typography } from "@mui/material";
 import { sendEmailVerification } from "firebase/auth";
-import { doc, collection, getDocFromServer, setDoc } from "firebase/firestore";
+import { doc, collection, getDocFromServer, setDoc, onSnapshot, updateDoc } from "firebase/firestore";
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
@@ -17,7 +18,19 @@ export function StoreValuesProvider(props: any) {
   
   const isTrackerListDefault = useSelector((state: RootState) => state.trackerList.default);
   const homePageMovies = useSelector((state: RootState) => state.homePageMov.movies);
+  const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
+
+  // Effect for watch list
+  useEffect(() => {
+    if (!user) return;
+    const userDocRef = doc(firestoreClient, `/users/${user._id}`);
+    return onSnapshot((collection(userDocRef, `watchList`)), 
+      (snap) => {
+        dispatch(setWatchList(snap.docs.map(d => d.data() as Movie)));
+        updateDoc(userDocRef, {watchListCount: snap.size});
+      });
+  }, [user]);
 
   // Effect for trckers
   useEffect(() => {

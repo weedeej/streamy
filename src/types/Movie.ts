@@ -27,7 +27,6 @@ export interface Movie {
   torrents:                  Torrent[];
   date_uploaded:             string;
   date_uploaded_unix:        number;
-  onWatchList?:              boolean;
 }
 
 export interface Torrent {
