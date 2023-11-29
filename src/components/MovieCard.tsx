@@ -1,12 +1,13 @@
 import { RootState } from "@/state/store";
+import { addMovie, removeMovie } from "@/state/watchList/watchListSlice";
 import { theme } from "@/styles";
 import { Movie } from "@/types";
 import { createMagnetLink, showToast } from "@/utils";
-import { Download, ExpandMore, Link } from "@mui/icons-material";
-import { Button, Card, CardActions, CardContent, CardMedia, Divider, ListItemIcon, ListItemText, Menu, MenuItem, MenuList, Typography } from "@mui/material";
+import { Add, Download, ExpandMore, Link, Remove } from "@mui/icons-material";
+import { Button, Card, CardActions, CardContent, CardMedia, Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, MenuList, Typography } from "@mui/material";
 import React from "react";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 
 type DownloadLink = { url: string, label: string };
@@ -15,9 +16,18 @@ export function MovieCard({ movie }: { movie: Movie }) {
   const { title_long, description_full, medium_cover_image, torrents, id } = movie;
   const trackerList = useSelector((state: RootState) => state.trackerList.trackers);
   const user = useSelector((state: RootState) => state.auth.user);
+  const watchList = useSelector((state: RootState) => state.watchList.watchList);
+  const [onWatchList, setIsOnWatchList] = useState<boolean>(false);
+  const dispatch = useDispatch();
+
   const [torrentsAnchorEl, setTorrentsAnchorEl] = useState<HTMLElement | null>(null);
   const [downloadLinks, setDownloadLinks] = useState<{ magnets: DownloadLink[], torrents: DownloadLink[] } | null>(null)
 
+  useEffect(() => {
+    setIsOnWatchList(!!watchList.find((m) => m.id === id))
+  }, [watchList]);
+
+  // effect for links
   useEffect(() => {
     if (downloadLinks) return;
     setDownloadLinks((prev) => ({magnets: [], torrents: []}));
@@ -48,6 +58,14 @@ export function MovieCard({ movie }: { movie: Movie }) {
     setTorrentsAnchorEl(null);
   }
 
+  function addOrRemoveFromWatchList() {
+    if (onWatchList) {
+      dispatch(removeMovie({id, title: title_long}));
+      return;
+    }
+    dispatch(addMovie(movie));
+  }
+
   return (
     <>
       <Card sx={{ minWidth: 350, maxWidth: 350, maxHeight: 500, minHeight: 500, display: "flex", flexDirection: "column" }}>
@@ -63,10 +81,13 @@ export function MovieCard({ movie }: { movie: Movie }) {
             {description_full}
           </Typography>
         </CardContent>
-        <CardActions sx={{ backgroundColor: theme.palette.grey[100] }}>
+        <CardActions sx={{ backgroundColor: theme.palette.grey[100], display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
           <Button variant="contained" onClick={onDownloadsClick} endIcon={<ExpandMore />}>
             Download
           </Button>
+          <IconButton onClick={addOrRemoveFromWatchList}>
+            {onWatchList ? <Remove/> : <Add/>}
+          </IconButton>
         </CardActions>
       </Card>
       <Menu open={!!torrentsAnchorEl} onClose={() => setTorrentsAnchorEl(null)} anchorEl={torrentsAnchorEl}>
