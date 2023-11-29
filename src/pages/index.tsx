@@ -1,4 +1,4 @@
-import { LoginModal, MovieCard, HelpModal, UserDrawer } from "@/components";
+import { LoginModal, MovieCard, HelpModal, UserDrawer, WatchList } from "@/components";
 import { authClient } from "@/firebaseConfig/firebase";
 import { useSearch } from "@/hooks";
 import { RootState } from "@/state/store";
@@ -110,8 +110,11 @@ export default function Home() {
             </Stack>
           </Toolbar>
         </AppBar>
-        <Stack p={2} direction="row" flexWrap="wrap" gap={2} alignItems="stretch" justifyContent="space-evenly" height="100%">
-          <MainContent isLoading={isLoading} query={query} result={searchResult} initialMovies={initialMovies}/>
+        <Stack p={0}>
+          <WatchList />
+          <Stack p={4} direction="row" flexWrap="wrap" gap={2} alignItems="stretch" justifyContent="space-evenly" height="100%">
+            <MainContent isLoading={isLoading} query={query} result={searchResult} initialMovies={initialMovies} />
+          </Stack>
         </Stack>
         <Stack alignItems="center" justifySelf="end" p={4}>
           <Typography variant="h5">

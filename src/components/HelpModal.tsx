@@ -1,5 +1,6 @@
 import { Download, Link, OpenInNew } from "@mui/icons-material";
 import { Button, Divider, List, ListItem, Modal, Paper, Stack, Typography } from "@mui/material";
+import { MagnetIcon } from ".";
 
 type HelpModalProps = {
   isOpen: boolean;
@@ -50,7 +51,7 @@ export function HelpModal(props: HelpModalProps) {
                 <Typography variant="h5">
                   For Magnet Links
                 </Typography>
-                (<Link />)
+                (<MagnetIcon width={20} height={20}/>)
               </Stack>
               <List>
                 <ListItem sx={{ display: "flex", flexDirection: "column" }}>

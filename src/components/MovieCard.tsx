@@ -10,6 +10,7 @@ import { deleteDoc, doc, setDoc, updateDoc } from "firebase/firestore";
 import React from "react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { MagnetIcon } from ".";
 
 
 type DownloadLink = { url: string, label: string };
@@ -117,7 +118,7 @@ export function MovieCard({ movie }: { movie: Movie }) {
               ...downloadLinks.magnets.map((link) => (
                 <MenuItem key={`magnet_link_${link.url}`} onClick={() => onMagnetClick(link)}>
                   <ListItemIcon>
-                    <Link />
+                    <MagnetIcon width={20} height={20}/>
                   </ListItemIcon>
                   <ListItemText>{link.label}</ListItemText>
                 </MenuItem>
