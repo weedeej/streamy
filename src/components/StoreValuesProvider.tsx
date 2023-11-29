@@ -56,7 +56,8 @@ export function StoreValuesProvider(props: any) {
       const streamyUser: StreamyUser = {
         _id: user.uid,
         name: user.displayName ?? `NEW USER`,
-        watchListCount: 0
+        watchListCount: 0,
+        email: user.email!,
       }
       await setDoc(userDocRef, streamyUser);
       dispatch(setUser(streamyUser));
