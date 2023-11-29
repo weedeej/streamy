@@ -1,5 +1,4 @@
-import { LoginModal, MovieCard } from "@/components";
-import { HelpModal } from "@/components/HelpModal";
+import { LoginModal, MovieCard, HelpModal } from "@/components";
 import { authClient } from "@/firebaseConfig/firebase";
 import { useSearch } from "@/hooks";
 import { RootState } from "@/state/store";
