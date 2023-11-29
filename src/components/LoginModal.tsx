@@ -49,10 +49,10 @@ export function LoginModal(props: LoginModalProps) {
       }).catch((r) => {
         if (r.code === "auth/email-already-in-use") {
           setIsSigningIn(false);
-          showToast("Email already in use", "error")
+          showToast("Error. Email is already in use.", "error");
           return;
         }
-        alert(r)
+        showToast(`Error. Please Contact Developer: ${r.code}`, "error");
       })
       return;
     }
@@ -63,10 +63,10 @@ export function LoginModal(props: LoginModalProps) {
     }).catch((r) => {
       if (r.code === "auth/invalid-login-credentials") {
         setIsSigningIn(false);
-        alert("Invalid email or password");
+        showToast("Error. Invalid email or password", "error");
         return;
       }
-      alert(r)
+      showToast(`Error. Please Contact Developer: ${r.code}`, "error");
     })
   }
 
@@ -107,9 +107,9 @@ export function LoginModal(props: LoginModalProps) {
               <Stack gap={0} width="100%">
                 <TextField type="password" name="password" size="small" label="Password" value={loginForm.password} onChange={updateForm} />
                 <Stack direction="row" justifyContent="space-between">
-                  <Link underline="hover" sx={{ cursor: "pointer" }} component="a" onClick={() => setActionMode("Register")}>
+                  <Link underline="hover" sx={{ cursor: "pointer" }} component="a" onClick={() => setActionMode(actionMode === "Login" ? "Register" : "Login")}>
                     <Typography variant="subtitle2" component="span">
-                      Create an account
+                      {actionMode === "Login" ? "Create an account" : "Existing User"}
                     </Typography>
                   </Link>
                   <Link underline="hover" sx={{ cursor: "pointer" }} component="a">

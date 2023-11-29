@@ -1,7 +1,7 @@
 import { RootState } from "@/state/store";
 import { theme } from "@/styles";
 import { Movie } from "@/types";
-import { createMagnetLink } from "@/utils";
+import { createMagnetLink, showToast } from "@/utils";
 import { Download, ExpandMore, Link } from "@mui/icons-material";
 import { Button, Card, CardActions, CardContent, CardMedia, Divider, ListItemIcon, ListItemText, Menu, MenuItem, MenuList, Typography } from "@mui/material";
 import React from "react";
@@ -33,17 +33,17 @@ export function MovieCard({ movie }: { movie: Movie }) {
   }, []);
 
   function onDownloadsClick(e: React.MouseEvent<HTMLButtonElement>) {
-    user ? setTorrentsAnchorEl(e.currentTarget) : alert("Must be logged-in to download")
+    user ? setTorrentsAnchorEl(e.currentTarget) : showToast("Must be logged-in to download", "error")
   }
 
   function onMagnetClick(link: DownloadLink) {
     navigator.clipboard.writeText(link.url)
-    alert(`${link.label} magnet link has been copied to your clipboard!`);
+    showToast(`${link.label} magnet link has been copied to your clipboard!`, "success");
     setTorrentsAnchorEl(null);
   }
 
   function onTorrentClick(link: DownloadLink) {
-    alert(`${link.label} torrent file is going to be downloaded.`);
+    showToast(`${link.label} torrent file is going to be downloaded.`, "success");
     window.open(link.url, "_blank");
     setTorrentsAnchorEl(null);
   }

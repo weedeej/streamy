@@ -1,5 +1,6 @@
 import { defaultQueryParam, ytsConfig } from "@/constants";
 import { ListMoviesParam, YTSQueryResponse } from "@/types";
+import { showToast } from "@/utils";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -20,8 +21,8 @@ export function useSearch(): [(key: keyof typeof query, value: any) => void, () 
     let response = null;
     try {
       response = (await axios.get<YTSQueryResponse>(url)).data;
-    } catch (e) {
-      alert("An error has occured. Contact Developer");
+    } catch (e:any) {
+      showToast(`An error has occured. Contact Developer: ${e.code}`, "error");
       console.error(e);
     }
     setSearchResult(response);

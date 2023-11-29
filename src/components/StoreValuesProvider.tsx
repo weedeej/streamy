@@ -4,7 +4,8 @@ import { setHomePageMov } from "@/state/homePageMov/homePageMovSlice";
 import { RootState } from "@/state/store";
 import { setTrackers } from "@/state/trackerList/trackerListSlice";
 import { StreamyUser } from "@/types";
-import { getInitialMovies, getTrackers } from "@/utils";
+import { getInitialMovies, getTrackers, showToast } from "@/utils";
+import { Typography } from "@mui/material";
 import { sendEmailVerification } from "firebase/auth";
 import { doc, collection, getDocFromServer, setDoc } from "firebase/firestore";
 import React, { useEffect } from "react";
@@ -40,23 +41,26 @@ export function StoreValuesProvider(props: any) {
       if (!user) return dispatch(setUser(null));
       if (!user.emailVerified) {
         sendEmailVerification(user);
-        alert("We have sent you a verification email. Please check inbox or spam");
+        showToast("We have sent you a verification email. Please check inbox or spam", "warning")
         authClient.signOut();
         return;
       }
       const userDocRef = doc(collection(firestoreClient, "users"), user.uid);
       const streamyUserSnap = await getDocFromServer(userDocRef);
       if (streamyUserSnap.exists()) {
-        dispatch(setUser(streamyUserSnap.data() as StreamyUser));
+        const streamyUser = streamyUserSnap.data() as StreamyUser
+        dispatch(setUser(streamyUser));
+        showToast(<Typography>Welcome Back, <b>{streamyUser.name}</b></Typography>, "success");
         return;
       }
       const streamyUser: StreamyUser = {
         _id: user.uid,
-        name: `NEW USER`,
+        name: user.displayName ?? `NEW USER`,
         watchListCount: 0
       }
       await setDoc(userDocRef, streamyUser);
       dispatch(setUser(streamyUser));
+      showToast(<Typography>Welcome Back, <b>{streamyUser.name}</b></Typography>, "success");
     });
   }, []);
 
