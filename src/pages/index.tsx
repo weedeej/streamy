@@ -1,4 +1,4 @@
-import { LoginModal, MovieCard, HelpModal } from "@/components";
+import { LoginModal, MovieCard, HelpModal, UserDrawer } from "@/components";
 import { authClient } from "@/firebaseConfig/firebase";
 import { useSearch } from "@/hooks";
 import { RootState } from "@/state/store";
@@ -10,6 +10,8 @@ import { useSelector } from "react-redux";
 export default function Home() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState<boolean>(false);
+  const [isUserDrawerOpen, setIsUserDrawerOpen] = useState<boolean>(false);
+
   const [query, setQuery] = useState<string>("");
   const [updateQuery, search, searchResult] = useSearch();
   const user = useSelector((state: RootState) => state.auth.user);
@@ -29,12 +31,12 @@ export default function Home() {
   }
 
   function onAccountIconClick() {
-    alert("TODO");
-    authClient.signOut();
+    setIsUserDrawerOpen(true);
   }
 
   return (
     <>
+      <UserDrawer isOpen={isUserDrawerOpen} onClose={() => setIsUserDrawerOpen(false)}/>
       <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
       <HelpModal isOpen={isHelpModalOpen} onClose={() => setIsHelpModalOpen(false)} />
       <Stack gap={2} minHeight="100vh">
@@ -98,7 +100,7 @@ export default function Home() {
                 edge="end"
                 onClick={!user ? onLoginClick : onAccountIconClick}
                 color="inherit"
-                title="Login"
+                title="User"
               >
                 {user ? <AccountCircle /> : <Login />}
               </IconButton>
