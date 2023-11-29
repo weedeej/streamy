@@ -2,7 +2,7 @@ import { useState } from "react";
 
 /**
  * @param initialData Data of with type of T
- * @returns Array of currentData with type of T, update function, and reset function
+ * @returns Array of: currentData with type of T, update function, and reset function
  */
 export function useForm<T>(initialData: T): [T, (e: React.ChangeEvent) => void, () => void] {
   const [formState, setFormState] = useState<T>(initialData);

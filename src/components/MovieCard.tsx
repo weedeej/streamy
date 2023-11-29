@@ -14,6 +14,7 @@ type DownloadLink = { url: string, label: string };
 export function MovieCard({ movie }: { movie: Movie }) {
   const { title_long, description_full, medium_cover_image, torrents, id } = movie;
   const trackerList = useSelector((state: RootState) => state.trackerList.trackers);
+  const user = useSelector((state: RootState) => state.auth.user);
   const [torrentsAnchorEl, setTorrentsAnchorEl] = useState<HTMLElement | null>(null);
   const [downloadLinks, setDownloadLinks] = useState<{ magnets: DownloadLink[], torrents: DownloadLink[] } | null>(null)
 
@@ -32,7 +33,7 @@ export function MovieCard({ movie }: { movie: Movie }) {
   }, []);
 
   function onDownloadsClick(e: React.MouseEvent<HTMLButtonElement>) {
-    setTorrentsAnchorEl(e.currentTarget);
+    user ? setTorrentsAnchorEl(e.currentTarget) : alert("Must be logged-in to download")
   }
 
   function onMagnetClick(link: DownloadLink) {

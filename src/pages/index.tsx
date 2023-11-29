@@ -1,5 +1,6 @@
 import { LoginModal, MovieCard } from "@/components";
 import { HelpModal } from "@/components/HelpModal";
+import { authClient } from "@/firebaseConfig/firebase";
 import { useSearch } from "@/hooks";
 import { RootState } from "@/state/store";
 import { AccountCircle, HelpOutline, Login, Menu, Search } from "@mui/icons-material";
@@ -26,6 +27,11 @@ export default function Home() {
 
   function onHelpModalClick() {
     setIsHelpModalOpen(true);
+  }
+
+  function onAccountIconClick() {
+    alert("TODO");
+    authClient.signOut();
   }
 
   return (
@@ -91,7 +97,7 @@ export default function Home() {
               <IconButton
                 size="large"
                 edge="end"
-                onClick={onLoginClick}
+                onClick={!user ? onLoginClick : onAccountIconClick}
                 color="inherit"
                 title="Login"
               >
