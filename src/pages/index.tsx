@@ -1,11 +1,10 @@
 import { LoginModal, MovieCard, HelpModal, UserDrawer, WatchList } from "@/components";
-import { authClient } from "@/firebaseConfig/firebase";
 import { useSearch } from "@/hooks";
 import { RootState } from "@/state/store";
 import { Movie, YTSQueryResponse } from "@/types";
-import { AccountCircle, HelpOutline, Login, Menu, Search } from "@mui/icons-material";
-import { AppBar, Badge, Box, Button, CircularProgress, IconButton, Stack, TextField, Toolbar, Typography } from "@mui/material";
-import { useState } from "react";
+import { AccountCircle, Close, HelpOutline, Login, Menu, Search } from "@mui/icons-material";
+import { AppBar, Box, CircularProgress, IconButton, Pagination, Stack, TextField, Toolbar, Typography } from "@mui/material";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 export default function Home() {
@@ -14,10 +13,21 @@ export default function Home() {
   const [isUserDrawerOpen, setIsUserDrawerOpen] = useState<boolean>(false);
 
   const [query, setQuery] = useState<string>("");
+  const [staticQuery, setStaticQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [updateQuery, search, searchResult, clearResult] = useSearch();
   const user = useSelector((state: RootState) => state.auth.user);
   const initialMovies = useSelector((state: RootState) => state.homePageMov.movies);
+  const [currentPage, setCurrentPage] = useState(1);
+
+
+  // Pagination effect
+  useEffect(() => {
+    if (!searchResult) return;
+    search().then(() => {
+      setIsLoading(() => false);
+    });
+  }, [currentPage]);
 
   function onLoginClick() {
     setIsLoginModalOpen(true);
@@ -26,6 +36,7 @@ export default function Home() {
   function onQueryUpdate(e: React.ChangeEvent<HTMLInputElement>) {
     if (!e.target.value) clearResult();
     updateQuery("query_term", e.target.value);
+    updateQuery("page", 1);
     setQuery(() => e.target.value);
   }
 
@@ -36,6 +47,31 @@ export default function Home() {
   function onAccountIconClick() {
     setIsUserDrawerOpen(true);
   }
+
+  function clearSearch() {
+    clearResult();
+    updateQuery("query_term", "");
+    updateQuery("page", 1);
+    setCurrentPage(1);
+    setQuery("");
+    setStaticQuery("");
+  }
+
+  function onSearch() {
+    setIsLoading(true);
+    search().then(() => {
+      setIsLoading(false);
+      setStaticQuery(query)
+    })
+  }
+
+  function onPageChange(e: any, page: number) {
+    setIsLoading(() => true);
+    updateQuery("page", page);
+    setCurrentPage(() => page);
+  }
+
+  const pageCount = (searchResult?.data.movie_count ?? 0) / (searchResult?.data.limit ?? 0);
 
   return (
     <>
@@ -74,13 +110,16 @@ export default function Home() {
                   }
                 }
               }}
+              value={query}
               InputProps={{
                 startAdornment: <Search style={{ stroke: "white", fill: "white" }} />,
+                endAdornment: query ? (
+                  <IconButton onClick={clearSearch}>
+                    <Close fontSize="small"/>
+                    </IconButton>
+                ) : <></>,
                 onKeyUp: (e) => {
-                  if (e.code === "Enter") {
-                    setIsLoading(true);
-                    search().then(() => setIsLoading(false))
-                  }
+                  if (e.code === "Enter") onSearch();
                 },
                 sx: {
                   color: "white"
@@ -113,8 +152,18 @@ export default function Home() {
         </AppBar>
         <Stack p={0}>
           <WatchList />
+          {
+            ((searchResult?.data.movie_count ?? 0 > 0)) ? (<Stack alignItems="center" flexWrap="wrap" px={4} pt={2} direction="row" justifyContent="space-between">
+              <Typography variant="body2">Showing {searchResult!.data.movies.length} out of {searchResult!.data.movie_count}</Typography>
+              {pageCount > 1 && <Pagination
+                count={Math.ceil(pageCount)}
+                color="primary"
+                onChange={onPageChange}
+              />}
+            </Stack>) : <></>
+          }
           <Stack p={4} direction="row" flexWrap="wrap" gap={2} alignItems="stretch" justifyContent="space-evenly" height="100%">
-            <MainContent isLoading={isLoading} query={query} result={searchResult} initialMovies={initialMovies} />
+            <MainContent isLoading={isLoading} query={query} result={searchResult} initialMovies={initialMovies} staticQuery={staticQuery} />
           </Stack>
         </Stack>
         <Stack alignItems="center" justifySelf="end" p={4}>
@@ -134,40 +183,29 @@ export default function Home() {
   )
 }
 
-function MainContent(props: { query: string, result: YTSQueryResponse | null, initialMovies: Movie[] | null, isLoading: boolean }) {
-  const { query, result, initialMovies, isLoading } = props;
-  console.log(query)
+function MainContent(props: { query: string, result: YTSQueryResponse | null, initialMovies: Movie[] | null, isLoading: boolean, staticQuery: string }) {
+  const { query, result, initialMovies, isLoading, staticQuery } = props;
+
+  if (isLoading || !initialMovies) return (
+    <Stack p={8} direction="row" justifyContent="center">
+      <CircularProgress />
+    </Stack>
+  );
   if (query) {
     if (result !== null) {
       if (result.data.movie_count < 1) {
         return (
           <Typography variant="h4" textAlign="center">
-            No results found for: &quot;{query}&quot;
+            No results found for: &quot;{staticQuery}&quot;
           </Typography>
         )
       } else {
         return result.data.movies.map((movie) => <MovieCard key={movie.id} movie={movie} />)
       }
     } else {
-      if (!initialMovies || isLoading) {
-        return (
-          <Stack p={8} direction="row" justifyContent="center">
-            <CircularProgress />
-          </Stack>
-        )
-      } else {
-        return initialMovies.map((movie) => <MovieCard key={movie.id} movie={movie} />);
-      }
-    }
-  } else {
-    if (!initialMovies || isLoading) {
-      return (
-        <Stack p={8} direction="row" justifyContent="center">
-          <CircularProgress />
-        </Stack>
-      )
-    } else {
       return initialMovies.map((movie) => <MovieCard key={movie.id} movie={movie} />);
     }
+  } else {
+    return initialMovies.map((movie) => <MovieCard key={movie.id} movie={movie} />);
   }
 }

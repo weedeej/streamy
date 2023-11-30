@@ -9,7 +9,7 @@ export function useSearch(cb?: (result: YTSQueryResponse | null) => void): [(key
   const [searchResult, setSearchResult] = useState<YTSQueryResponse | null>(null);
 
   function updateQuery(key: keyof typeof query, value: any) {
-    setQuery({...query, [key]: value});
+    setQuery((q) => ({...q, [key]: value}));
   }
 
   function buildQuery() {
