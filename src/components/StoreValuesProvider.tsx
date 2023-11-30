@@ -72,7 +72,8 @@ export function StoreValuesProvider(props: any) {
         name: user.displayName ?? `NEW USER`,
         watchListCount: 0,
         email: user.email!,
-        watchListId: generateUUID()
+        watchListId: generateUUID(),
+        isWatchlistPublic: false,
       }
       await setDoc(userDocRef, streamyUser);
       dispatch(setUser(streamyUser));

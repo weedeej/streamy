@@ -4,4 +4,5 @@ export type StreamyUser = {
   watchListCount: number;
   email: string;
   watchListId: string;
+  isWatchlistPublic: boolean;
 }

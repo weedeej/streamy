@@ -23,10 +23,8 @@ export default function App({ Component, pageProps }: AppProps) {
             newestOnTop={false}
             closeOnClick
             rtl={false}
-            pauseOnFocusLoss
             draggable
-            pauseOnHover
-            theme="light" />
+            theme="dark" />
         </StoreValuesProvider>
       </Provider>
     </>
