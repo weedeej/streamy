@@ -4,7 +4,7 @@ import { RootState } from "@/state/store";
 import { Movie, YTSQueryResponse } from "@/types";
 import { AccountCircle, Close, HelpOutline, Login, Menu, Search } from "@mui/icons-material";
 import { AppBar, Box, CircularProgress, IconButton, Pagination, Stack, TextField, Toolbar, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 export default function Home() {
@@ -57,7 +57,9 @@ export default function Home() {
     setStaticQuery("");
   }
 
-  function onSearch() {
+  function onSearch(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (query === staticQuery) return;
     setIsLoading(true);
     search().then(() => {
       setIsLoading(false);
@@ -97,6 +99,7 @@ export default function Home() {
             >
               SSTREAMY
             </Typography>
+            <form onSubmit={onSearch}>
             <TextField
               variant="outlined"
               size="small"
@@ -118,15 +121,13 @@ export default function Home() {
                     <Close fontSize="small"/>
                     </IconButton>
                 ) : <></>,
-                onKeyUp: (e) => {
-                  if (e.code === "Enter") onSearch();
-                },
                 sx: {
                   color: "white"
                 }
               }}
               onChange={onQueryUpdate}
               placeholder="Search" />
+            </form>
             <Box sx={{ flexGrow: 1 }} />
             <Stack direction="row" gap={2}>
               <IconButton
