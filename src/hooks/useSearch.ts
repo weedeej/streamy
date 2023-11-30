@@ -2,7 +2,7 @@ import { defaultQueryParam, ytsConfig } from "@/constants";
 import { ListMoviesParam, YTSQueryResponse } from "@/types";
 import { showToast } from "@/utils";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export function useSearch(cb?: (result: YTSQueryResponse | null) => void): [(key: keyof typeof query, value: any) => void, () => Promise<void>, YTSQueryResponse | null, () => void] {
   const [query, setQuery] = useState<ListMoviesParam>(defaultQueryParam);

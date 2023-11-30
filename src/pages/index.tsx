@@ -4,7 +4,7 @@ import { RootState } from "@/state/store";
 import { Movie, YTSQueryResponse } from "@/types";
 import { AccountCircle, Close, HelpOutline, Login, Menu, Search } from "@mui/icons-material";
 import { AppBar, Box, CircularProgress, IconButton, Pagination, Stack, TextField, Toolbar, Typography } from "@mui/material";
-import { ChangeEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 export default function Home() {
