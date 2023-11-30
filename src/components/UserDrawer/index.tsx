@@ -1,6 +1,7 @@
+import { authClient } from "@/firebaseConfig/firebase";
 import { RootState } from "@/state/store";
 import { stringAvatar } from "@/utils";
-import { Avatar, Card, CardHeader, Drawer, Paper, Stack, Typography } from "@mui/material";
+import { Avatar, Button, Card, CardHeader, Drawer, Paper, Stack, Typography } from "@mui/material";
 import { useSelector } from "react-redux";
 
 type UserDrawerProps = {
@@ -14,10 +15,14 @@ export function UserDrawer(props: UserDrawerProps) {
 
   if (!user) return null;
 
+  function onSignout() {
+    authClient.signOut();
+    onClose();
+  }
   return (<>
     <Drawer open={isOpen} anchor="right" onClose={onClose} keepMounted>
-      <Paper sx={{ width: 280 }} elevation={0}>
-        <Stack padding={1} gap={1}>
+      <Paper sx={{ width: 280, height: "100%" }} elevation={0}>
+        <Stack padding={1} gap={1} height="inherit" boxSizing="border-box">
           <Stack
             borderRadius={2}
             direction="row"
@@ -31,7 +36,10 @@ export function UserDrawer(props: UserDrawerProps) {
               <Typography variant="caption">{user.email}</Typography>
             </Stack>
           </Stack>
-          <Stack
+          <Stack justifyContent="end" height="100%">
+            <Button color="error" variant="contained" onClick={onSignout}>Logout</Button>
+          </Stack>
+          {/* <Stack
             borderRadius={2}
             direction="row"
             alignItems="center"
@@ -39,7 +47,7 @@ export function UserDrawer(props: UserDrawerProps) {
             sx={(theme) => ({ backgroundColor: theme.palette.grey[300] })}
             p={1}>
               <Typography variant="h5">Watch List</Typography>
-          </Stack>
+          </Stack> */}
         </Stack>
       </Paper>
     </Drawer>
