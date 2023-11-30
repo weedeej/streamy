@@ -3,4 +3,5 @@ export type StreamyUser = {
   name: string;
   watchListCount: number;
   email: string;
+  watchListId: string;
 }

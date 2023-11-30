@@ -11,6 +11,7 @@ import { sendEmailVerification } from "firebase/auth";
 import { doc, collection, getDocFromServer, setDoc, onSnapshot, updateDoc } from "firebase/firestore";
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import {v4 as generateUUID} from "uuid";
 
 export function StoreValuesProvider(props: any) {
   const {children} = props;
@@ -71,6 +72,7 @@ export function StoreValuesProvider(props: any) {
         name: user.displayName ?? `NEW USER`,
         watchListCount: 0,
         email: user.email!,
+        watchListId: generateUUID()
       }
       await setDoc(userDocRef, streamyUser);
       dispatch(setUser(streamyUser));
