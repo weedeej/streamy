@@ -15,7 +15,7 @@ export default function Home() {
 
   const [query, setQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
-  const [updateQuery, search, searchResult] = useSearch();
+  const [updateQuery, search, searchResult, clearResult] = useSearch();
   const user = useSelector((state: RootState) => state.auth.user);
   const initialMovies = useSelector((state: RootState) => state.homePageMov.movies);
 
@@ -24,6 +24,7 @@ export default function Home() {
   }
 
   function onQueryUpdate(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!e.target.value) clearResult();
     updateQuery("query_term", e.target.value);
     setQuery(() => e.target.value);
   }
@@ -146,6 +147,16 @@ function MainContent(props: { query: string, result: YTSQueryResponse | null, in
         )
       } else {
         return result.data.movies.map((movie) => <MovieCard key={movie.id} movie={movie} />)
+      }
+    } else {
+      if (!initialMovies || isLoading) {
+        return (
+          <Stack p={8} direction="row" justifyContent="center">
+            <CircularProgress />
+          </Stack>
+        )
+      } else {
+        return initialMovies.map((movie) => <MovieCard key={movie.id} movie={movie} />);
       }
     }
   } else {
