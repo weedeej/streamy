@@ -1,9 +1,14 @@
-import { authClient } from "@/firebaseConfig/firebase";
+import { httpConfig } from "@/constants";
+import { authClient, firestoreClient } from "@/firebaseConfig/firebase";
+import { changeUserValue, setUser } from "@/state/auth/authSlice";
 import { RootState } from "@/state/store";
 import { showToast, stringAvatar } from "@/utils";
 import { CopyAll } from "@mui/icons-material";
-import { Avatar, Button, Card, CardHeader, Drawer, IconButton, Paper, Stack, Switch, Typography } from "@mui/material";
-import { useSelector } from "react-redux";
+import { Avatar, Button, Card, CardHeader, CircularProgress, Drawer, IconButton, Paper, Stack, Switch, Typography } from "@mui/material";
+import axios from "axios";
+import { doc, collection } from "firebase/firestore";
+import { ChangeEvent, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 type UserDrawerProps = {
   isOpen: boolean;
@@ -13,14 +18,37 @@ type UserDrawerProps = {
 export function UserDrawer(props: UserDrawerProps) {
   const { isOpen, onClose } = props;
   const user = useSelector((state: RootState) => state.auth.user);
+  const firebaseUser = useSelector((state: RootState) => state.auth.firebaseUser);
+  const [isSwitchLoading, setIsSwitchLoading] = useState(false);
+  const dispatch = useDispatch();
 
-  if (!user) return null;
+  if (!user || !firebaseUser) return null;
 
-  const watchListUrl = `https://locahost:3000/list/${user.watchListId}`
+  const watchListUrl = `${httpConfig.uri}/list/${user.watchListId}`
 
   function onWatchListCopy() {
     navigator.clipboard.writeText(watchListUrl);
     showToast("Link Copied!", "success");
+  }
+
+  async function onPublicSwitchChange(e: ChangeEvent, isChecked: boolean) {
+    const accessToken = firebaseUser!.stsTokenManager!.accessToken;
+
+    setIsSwitchLoading(true);
+    axios.post(`${httpConfig.uri}/api/users/${user!._id}/update`, {
+      key: "isWatchlistPublic",
+      value: isChecked
+    }, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }
+    }).then(() => {
+      dispatch(changeUserValue({ key: "isWatchlistPublic", value: isChecked }));
+      showToast(`Watchlist has been made ${isChecked ? "public" : "private"}`, "success");
+      setIsSwitchLoading(false);
+    });
   }
 
   function onSignout() {
@@ -57,7 +85,10 @@ export function UserDrawer(props: UserDrawerProps) {
               <Typography variant="body1">
                 Public Watchlist
               </Typography>
-              <Switch checked={user.isWatchlistPublic} />
+              <Stack direction="row" gap={1} alignItems="center">
+                {isSwitchLoading && <CircularProgress size={16} />}
+                <Switch checked={user.isWatchlistPublic} onChange={onPublicSwitchChange} disabled={isSwitchLoading} />
+              </Stack>
             </Stack>
             <Stack gap={0}>
               <Stack direction="row" alignItems="center" justifyContent="space-between">
@@ -65,7 +96,7 @@ export function UserDrawer(props: UserDrawerProps) {
                   Watchlist URL:
                 </Typography>
                 <IconButton size="small" title="Copy Link" onClick={onWatchListCopy}>
-                  <CopyAll/>
+                  <CopyAll />
                 </IconButton>
               </Stack>
               <Typography fontWeight={700} variant="subtitle2" p={1} borderRadius={1} sx={(theme) => ({ backgroundColor: theme.palette.grey[400] })}>
@@ -73,7 +104,18 @@ export function UserDrawer(props: UserDrawerProps) {
               </Typography>
             </Stack>
           </Stack>
-          <Stack justifyContent="end" height="100%">
+          <Stack justifyContent="end" height="100%" gap={1}>
+            <Stack
+              gap={0}
+              p={1}
+              sx={(theme) => ({ backgroundColor: theme.palette.grey[300] })}
+            >
+              <Typography fontWeight={700}>User Summary</Typography>
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography>Watchlist Count</Typography>
+                <Typography fontWeight={700}>{user.watchListCount}</Typography>
+              </Stack>
+            </Stack>
             <Button color="error" variant="contained" onClick={onSignout}>Logout</Button>
           </Stack>
           {/* <Stack

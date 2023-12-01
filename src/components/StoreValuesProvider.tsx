@@ -1,5 +1,5 @@
 import { authClient, firestoreClient } from "@/firebaseConfig/firebase";
-import { setUser } from "@/state/auth/authSlice";
+import { setFirebaseUser, setUser } from "@/state/auth/authSlice";
 import { setHomePageMov } from "@/state/homePageMov/homePageMovSlice";
 import { RootState } from "@/state/store";
 import { setTrackers } from "@/state/trackerList/trackerListSlice";
@@ -7,7 +7,7 @@ import { setWatchList } from "@/state/watchList/watchListSlice";
 import { Movie, StreamyUser } from "@/types";
 import { getInitialMovies, getTrackers, showToast } from "@/utils";
 import { Typography } from "@mui/material";
-import { sendEmailVerification } from "firebase/auth";
+import { User, sendEmailVerification } from "firebase/auth";
 import { doc, collection, getDocFromServer, setDoc, onSnapshot, updateDoc } from "firebase/firestore";
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
@@ -52,13 +52,17 @@ export function StoreValuesProvider(props: any) {
   // Effect for authstate
   useEffect(() => {
     authClient.onAuthStateChanged(async (user) => {
-      if (!user) return dispatch(setUser(null));
+      if (!user) {
+        dispatch(setFirebaseUser(null));
+        return dispatch(setUser(null));
+      }
       if (!user.emailVerified) {
         sendEmailVerification(user);
         showToast("We have sent you a verification email. Please check inbox or spam", "warning")
         authClient.signOut();
         return;
       }
+      dispatch(setFirebaseUser(user.toJSON() as User));
       const userDocRef = doc(collection(firestoreClient, "users"), user.uid);
       const streamyUserSnap = await getDocFromServer(userDocRef);
       if (streamyUserSnap.exists()) {

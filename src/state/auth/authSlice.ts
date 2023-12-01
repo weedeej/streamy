@@ -1,12 +1,19 @@
 import { StreamyUser } from "@/types";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { User } from "firebase/auth";
+
+type FirebaseUserObject = User & {
+  stsTokenManager?: {accessToken: string}
+}
 
 interface AuthState {
-  user: StreamyUser | null
+  user: StreamyUser | null,
+  firebaseUser: FirebaseUserObject | null
 }
 
 const initialState: AuthState = {
-  user: null
+  user: null,
+  firebaseUser: null
 }
 
 const authSlice = createSlice({
@@ -16,7 +23,10 @@ const authSlice = createSlice({
     setUser: (state, action: PayloadAction<StreamyUser | null>) => {
       state.user = action.payload
     },
-    changeUserValue(state, action: PayloadAction<{key: keyof StreamyUser, value: any}>) {
+    setFirebaseUser: (state, action: PayloadAction<FirebaseUserObject | null>) => {
+      state.firebaseUser = action.payload;
+    },
+    changeUserValue: (state, action: PayloadAction<{key: keyof StreamyUser, value: any}>) => {
       if (!state.user) return;
       const {key, value} = action.payload;
       const user: StreamyUser = {...state.user};
@@ -27,6 +37,6 @@ const authSlice = createSlice({
   }
 });
 
-export const {setUser, changeUserValue} = authSlice.actions;
+export const {setUser, changeUserValue, setFirebaseUser} = authSlice.actions;
 
 export default authSlice.reducer;
