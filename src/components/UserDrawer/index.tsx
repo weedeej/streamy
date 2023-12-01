@@ -6,7 +6,7 @@ import { showToast, stringAvatar } from "@/utils";
 import { CopyAll } from "@mui/icons-material";
 import { Avatar, Button, Card, CardHeader, CircularProgress, Drawer, IconButton, Paper, Stack, Switch, Typography } from "@mui/material";
 import axios from "axios";
-import { doc, collection } from "firebase/firestore";
+import { doc, collection, updateDoc } from "firebase/firestore";
 import { ChangeEvent, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -35,9 +35,8 @@ export function UserDrawer(props: UserDrawerProps) {
     const accessToken = firebaseUser!.stsTokenManager!.accessToken;
 
     setIsSwitchLoading(true);
-    axios.post(`${httpConfig.uri}/api/users/${user!._id}/update`, {
-      key: "isWatchlistPublic",
-      value: isChecked
+    axios.post(`${httpConfig.uri}/api/users/${user!._id}/watchList/update`, {
+      isPublic: isChecked
     }, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -45,9 +44,12 @@ export function UserDrawer(props: UserDrawerProps) {
         Accept: "application/json"
       }
     }).then(() => {
-      dispatch(changeUserValue({ key: "isWatchlistPublic", value: isChecked }));
-      showToast(`Watchlist has been made ${isChecked ? "public" : "private"}`, "success");
-      setIsSwitchLoading(false);
+      const userDocRef = doc(collection(firestoreClient, "users"), user!._id);
+      updateDoc(userDocRef, {isWatchlistPublic: isChecked}).then(() => {
+        dispatch(changeUserValue({ key: "isWatchlistPublic", value: isChecked }));
+        showToast(`Watchlist has been made ${isChecked ? "public" : "private"}`, "success");
+        setIsSwitchLoading(false);
+      })
     });
   }
 
@@ -56,7 +58,7 @@ export function UserDrawer(props: UserDrawerProps) {
     onClose();
   }
   return (<>
-    <Drawer open={isOpen} anchor="right" onClose={onClose} keepMounted>
+    <Drawer open={isOpen} anchor="right" onClose={onClose}>
       <Paper sx={{ width: 280, height: "100%" }} elevation={0}>
         <Stack padding={1} gap={1} height="inherit" boxSizing="border-box">
           <Stack
