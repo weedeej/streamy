@@ -85,7 +85,7 @@ export function UserDrawer(props: UserDrawerProps) {
               alignItems="center"
             >
               <Typography variant="body1">
-                Public Watchlist
+                Public Watchlist (NOT WORKING)
               </Typography>
               <Stack direction="row" gap={1} alignItems="center">
                 {isSwitchLoading && <CircularProgress size={16} />}
