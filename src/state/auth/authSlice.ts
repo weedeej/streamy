@@ -15,10 +15,18 @@ const authSlice = createSlice({
   reducers: {
     setUser: (state, action: PayloadAction<StreamyUser | null>) => {
       state.user = action.payload
+    },
+    changeUserValue(state, action: PayloadAction<{key: keyof StreamyUser, value: any}>) {
+      if (!state.user) return;
+      const {key, value} = action.payload;
+      const user: StreamyUser = {...state.user};
+      // @ts-ignore
+      user[key] = value;
+      state.user = user;
     }
   }
 });
 
-export const {setUser} = authSlice.actions;
+export const {setUser, changeUserValue} = authSlice.actions;
 
 export default authSlice.reducer;
