@@ -101,7 +101,7 @@ export function UserDrawer(props: UserDrawerProps) {
                   <CopyAll />
                 </IconButton>
               </Stack>
-              <Typography fontWeight={700} variant="subtitle2" p={1} borderRadius={1} sx={(theme) => ({ backgroundColor: theme.palette.grey[400] })}>
+              <Typography fontWeight={700} variant="subtitle2" p={1} borderRadius={1} sx={(theme) => ({ backgroundColor: theme.palette.grey[400], wordBreak: "break-all" })}>
                 {watchListUrl}
               </Typography>
             </Stack>
