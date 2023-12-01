@@ -18,7 +18,6 @@ type UserDrawerProps = {
 export function UserDrawer(props: UserDrawerProps) {
   const { isOpen, onClose } = props;
   const user = useSelector((state: RootState) => state.auth.user);
-  const watchList = useSelector((state: RootState) => state.watchList.watchList)
   const firebaseUser = useSelector((state: RootState) => state.auth.firebaseUser);
   const [isSwitchLoading, setIsSwitchLoading] = useState(false);
   const dispatch = useDispatch();
@@ -116,7 +115,7 @@ export function UserDrawer(props: UserDrawerProps) {
               <Typography fontWeight={700}>User Summary</Typography>
               <Stack direction="row" justifyContent="space-between" alignItems="center">
                 <Typography>Watchlist Count</Typography>
-                <Typography fontWeight={700}>{watchList.length}</Typography>
+                <Typography fontWeight={700}>{user.watchListCount}</Typography>
               </Stack>
             </Stack>
             <Button color="error" variant="contained" onClick={onSignout}>Logout</Button>

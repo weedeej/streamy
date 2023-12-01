@@ -33,6 +33,16 @@ export function StoreValuesProvider(props: any) {
       });
   }, [user]);
 
+  // Effect for userdoc
+  useEffect(() => {
+    if (!user) return;
+    const userDocRef = doc(firestoreClient, `/users/${user._id}`);
+    return onSnapshot(userDocRef, 
+      (snap) => {
+        dispatch(setUser((snap.data() as StreamyUser)));
+      });
+  }, [user]);
+
   // Effect for trckers
   useEffect(() => {
     if (!isTrackerListDefault) return;
