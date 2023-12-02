@@ -40,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
   
   const userRef = adminDb.collection("users").doc(uid);
-  const { watchListId, watchListCount } = (await userRef.get()).data() as StreamyUser;
+  const { watchListId, watchListCount, name } = (await userRef.get()).data() as StreamyUser;
   const userPublicWatchListRef = adminDb.collection("publicWatchlist").doc(watchListId);
 
   if (!isPublic) {
@@ -48,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).send(result);
   }
 
-  await userPublicWatchListRef.create({owner: uid, count: watchListCount});
+  await userPublicWatchListRef.create({owner: uid, count: watchListCount, ownerName: name});
   const watchListRef = userRef.collection("watchList");
   await copyCollection(watchListRef, userPublicWatchListRef.collection("watchList"))
   return res.status(200).send({success: true});

@@ -4,10 +4,12 @@ import { RootState } from "@/state/store";
 import { Movie, YTSQueryResponse } from "@/types";
 import { AccountCircle, Close, HelpOutline, Login, Menu, Search } from "@mui/icons-material";
 import { AppBar, Box, CircularProgress, IconButton, Pagination, Stack, TextField, Toolbar, Typography } from "@mui/material";
+import { useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 export default function Home() {
+
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState<boolean>(false);
   const [isUserDrawerOpen, setIsUserDrawerOpen] = useState<boolean>(false);
@@ -19,7 +21,6 @@ export default function Home() {
   const user = useSelector((state: RootState) => state.auth.user);
   const initialMovies = useSelector((state: RootState) => state.homePageMov.movies);
   const [currentPage, setCurrentPage] = useState(1);
-
 
   // Pagination effect
   useEffect(() => {
@@ -153,6 +154,7 @@ export default function Home() {
         </AppBar>
         <Stack p={0}>
           <WatchList />
+          <WatchList isPublicWatchList/>
           {
             ((searchResult?.data.movie_count ?? 0 > 0)) ? (<Stack alignItems="center" flexWrap="wrap" px={4} pt={2} direction="row" justifyContent="space-between">
               <Typography variant="body2">Showing {searchResult!.data.movies.length} out of {searchResult!.data.movie_count}</Typography>
@@ -186,12 +188,15 @@ export default function Home() {
 
 function MainContent(props: { query: string, result: YTSQueryResponse | null, initialMovies: Movie[] | null, isLoading: boolean, staticQuery: string }) {
   const { query, result, initialMovies, isLoading, staticQuery } = props;
+  const urlParams = useSearchParams();
+  const isServer = typeof window === "undefined"
 
-  if (isLoading || !initialMovies) return (
+  if (isLoading || !initialMovies || isServer) return (
     <Stack p={8} direction="row" justifyContent="center">
       <CircularProgress />
     </Stack>
   );
+  
   if (query) {
     if (result !== null) {
       if (result.data.movie_count < 1) {

@@ -3,19 +3,50 @@ import { Stack, Typography } from "@mui/material";
 import { useSelector } from "react-redux";
 import { WatchListMovieCard } from "./WatchListMovieCard";
 import { theme } from "@/styles";
+import { useEffect, useState } from "react";
+import { Movie, PublicWatchlistDoc } from "@/types";
+import { collection, doc, getDocFromServer, getDocsFromServer, onSnapshot } from "firebase/firestore";
+import { firestoreClient } from "@/firebaseConfig/firebase";
+import { useSearchParams } from "next/navigation";
 
-export function WatchList() {
+type WatchListProps = {
+  isPublicWatchList?: boolean
+}
+export function WatchList({isPublicWatchList}: WatchListProps) {
+  const urlParams = useSearchParams();
+  const publicListId = urlParams.get("list");
   const watchList = useSelector((state: RootState) => state.watchList.watchList)
-  if (watchList.length < 1) return null;
+  const [publicWatchList, setPublicWatchList] = useState<Movie[]>([]);
+  const [publicWatchListOwner, setPublicWatchListOwner] = useState<PublicWatchlistDoc | null>(null);
+  
+  useEffect(() => {
+    if (!isPublicWatchList || !publicListId) return;
+    const listOwnerRef = doc(collection(firestoreClient, "publicWatchlist"), publicListId);
+    getDocFromServer(listOwnerRef).then((snap) => {
+      if (!snap.exists) return;
+      const data = snap.data() as PublicWatchlistDoc;
+      setPublicWatchListOwner(data);
+    });
+    const listRef = collection(firestoreClient, `publicWatchlist/${publicListId}/watchList`);
+    getDocsFromServer(listRef).then((snap) => {
+      const list = snap.docs.map((d) => d.data() as Movie);
+      setPublicWatchList(list);
+    });
+  }, []);
+
+  const list = (isPublicWatchList ? publicWatchList : watchList)
+
+  if (list.length < 1) return null;
+
   return (<>
     <Stack direction="column" gap={0}>
       <Stack direction="row" alignItems="start" gap={1} px={2}>
-        <Typography variant="h5" fontWeight={500}>Watch List</Typography>
-        <Typography variant="subtitle2" fontWeight={700}>({watchList.length})</Typography>
+        <Typography variant="h5" fontWeight={500}>{publicWatchListOwner ? `${publicWatchListOwner.ownerName}'s list` : "Your Watch List"}</Typography>
+        <Typography variant="subtitle2" fontWeight={700}>({list.length})</Typography>
       </Stack>
       <Stack direction="row" flexWrap="nowrap" sx={{overflowX: "auto", backgroundColor: theme.palette.grey[700]}} gap={2} p={2}>
         {
-          watchList.map((m) => <WatchListMovieCard key={`watchList_movie_${m.id}`} movie={m}/>)
+          list.map((m) => <WatchListMovieCard key={`watchList_movie_${m.id}`} movie={m}/>)
         }
       </Stack>
     </Stack>

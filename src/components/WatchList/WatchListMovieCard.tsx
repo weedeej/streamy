@@ -1,6 +1,6 @@
 import { theme } from "@/styles";
 import { Movie } from "@/types";
-import { Delete, Download, MoreVert, Remove } from "@mui/icons-material";
+import { Add, Delete, Download, MoreVert, Remove } from "@mui/icons-material";
 import { Box, Card, CardActions, CardHeader, CardMedia, CircularProgress, Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, MenuList, Stack, Typography } from "@mui/material";
 import { MagnetIcon } from "..";
 import { useEffect, useState } from "react";
@@ -8,7 +8,7 @@ import { createMagnetLink, showToast } from "@/utils";
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { firestoreClient } from "@/firebaseConfig/firebase";
-import { deleteDoc, doc } from "firebase/firestore";
+import { deleteDoc, doc, setDoc } from "firebase/firestore";
 
 
 type DownloadLink = { url: string, label: string };
@@ -16,11 +16,13 @@ type DownloadLink = { url: string, label: string };
 export function WatchListMovieCard({ movie }: { movie: Movie }) {
   const { title, title_long, description_full, medium_cover_image, torrents, id } = movie;
   const trackerList = useSelector((state: RootState) => state.trackerList.trackers);
+  const watchList = useSelector((state: RootState) => state.watchList.watchList);
   const user = useSelector((state: RootState) => state.auth.user);
   const [downloadLinks, setDownloadLinks] = useState<{ magnets: DownloadLink[], torrents: DownloadLink[] } | null>(null);
   const [torrentsAnchorEl, setTorrentsAnchorEl] = useState<HTMLElement | null>(null);
   const [magnetsAnchorEl, setMagnetsAnchorEl] = useState<HTMLElement | null>(null);
   const [isDeleteLoading, setIsDeleteLoading] = useState<boolean>(false);
+  const [isAddingToWatchList, setIsAddingToWatchList] = useState<boolean>(false);
 
   // effect for links
   useEffect(() => {
@@ -38,11 +40,13 @@ export function WatchListMovieCard({ movie }: { movie: Movie }) {
   }, []);
 
   function onTorrentClick(e: React.MouseEvent<HTMLButtonElement>) {
+    if (!user) return showToast("Must be logged-in to download", "error")
     setMagnetsAnchorEl(null);
     setTorrentsAnchorEl(e.currentTarget);
   }
 
   function onMagnetClick(e: React.MouseEvent<HTMLButtonElement>) {
+    if (!user) return showToast("Must be logged-in to download", "error")
     setTorrentsAnchorEl(null);
     setMagnetsAnchorEl(e.currentTarget);
   }
@@ -74,6 +78,18 @@ export function WatchListMovieCard({ movie }: { movie: Movie }) {
     });
   }
 
+  function addToWatchList() {
+    if (!user) return;
+    const docRef = doc(firestoreClient, `/users/${user._id}/watchList/${id}`);
+    setIsAddingToWatchList(true);
+    setDoc(docRef, movie).then(() => {
+      showToast(`${title_long} has been removed from watch list`, "error");
+      setIsAddingToWatchList(false)
+    });
+  }
+
+  const isInWatchList = !!watchList.find((v) => v.id === id);
+
   return (<>
     <Card sx={{ maxWidth: 400, minWidth: 400, minHeight: 150, display: "flex", gap: 1, maxHeight: 150 }}>
       <Box display="flex">
@@ -87,9 +103,17 @@ export function WatchListMovieCard({ movie }: { movie: Movie }) {
             <IconButton onClick={onTorrentClick}>
               <Download fontSize="small" />
             </IconButton>
-            <IconButton color="error" onClick={removeFromWatchList} disabled={isDeleteLoading}>
-              {isDeleteLoading ? <CircularProgress size={24}/> : <Delete fontSize="small" />}
-            </IconButton>
+            {
+              isInWatchList ? (
+                <IconButton color="error" onClick={removeFromWatchList} disabled={isDeleteLoading}>
+                  {isDeleteLoading ? <CircularProgress size={24} /> : <Delete fontSize="small" />}
+                </IconButton>
+              ) : (
+                <IconButton onClick={addToWatchList} disabled={isAddingToWatchList}>
+                  {isAddingToWatchList ? <CircularProgress size={24} /> : <Add fontSize="small" />}
+                </IconButton>
+              )
+            }
           </Stack>
         </CardActions>
       </Box>
