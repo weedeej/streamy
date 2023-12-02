@@ -44,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const userPublicWatchListRef = adminDb.collection("publicWatchlist").doc(watchListId);
 
   if (!isPublic) {
-    const result = await userPublicWatchListRef.delete();
+    const result = await adminDb.recursiveDelete(userPublicWatchListRef);
     return res.status(200).send(result);
   }
 
