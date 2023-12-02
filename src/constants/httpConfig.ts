@@ -1,4 +1,3 @@
 export const httpConfig = {
-  uri: "http://localhost:3000"
-  // uri: "https://sstreamy.vercel.app"
+  uri: process.env.IS_LOCAL ? "http://localhost:3000" : "https://sstreamy.vercel.app"
 }
