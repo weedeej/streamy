@@ -26,7 +26,7 @@ export function UserDrawer(props: UserDrawerProps) {
 
   if (!user || !firebaseUser) return null;
 
-  const watchListUrl = `${httpConfig.uri}/list/${user.watchListId}`
+  const watchListUrl = `${httpConfig.uri}/?list=${user.watchListId}`
 
   function onWatchListCopy() {
     navigator.clipboard.writeText(watchListUrl);
