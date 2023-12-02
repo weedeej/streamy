@@ -3,11 +3,11 @@ import { authClient, firestoreClient } from "@/firebaseConfig/firebase";
 import { changeUserValue, setUser } from "@/state/auth/authSlice";
 import { RootState } from "@/state/store";
 import { showToast, stringAvatar } from "@/utils";
-import { CopyAll } from "@mui/icons-material";
-import { Avatar, Button, Card, CardHeader, CircularProgress, Drawer, IconButton, Paper, Stack, Switch, Typography } from "@mui/material";
+import { CopyAll, Edit } from "@mui/icons-material";
+import { Avatar, Button, Card, CardHeader, CircularProgress, Drawer, IconButton, Paper, Stack, Switch, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import { doc, collection, updateDoc } from "firebase/firestore";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 type UserDrawerProps = {
@@ -20,6 +20,8 @@ export function UserDrawer(props: UserDrawerProps) {
   const user = useSelector((state: RootState) => state.auth.user);
   const firebaseUser = useSelector((state: RootState) => state.auth.firebaseUser);
   const [isSwitchLoading, setIsSwitchLoading] = useState(false);
+  const [isNameEditing, setIsNameEditing] = useState(false);
+  const nameFieldRef = useRef<HTMLInputElement | null>(null);
   const dispatch = useDispatch();
 
   if (!user || !firebaseUser) return null;
@@ -45,12 +47,23 @@ export function UserDrawer(props: UserDrawerProps) {
       }
     }).then(() => {
       const userDocRef = doc(collection(firestoreClient, "users"), user!._id);
-      updateDoc(userDocRef, {isWatchlistPublic: isChecked}).then(() => {
+      updateDoc(userDocRef, { isWatchlistPublic: isChecked }).then(() => {
         dispatch(changeUserValue({ key: "isWatchlistPublic", value: isChecked }));
         showToast(`Watchlist has been made ${isChecked ? "public" : "private"}`, "success");
         setIsSwitchLoading(false);
       })
     });
+  }
+
+  function onNameFieldSubmit(e: FormEvent) {
+    e.preventDefault();
+    const userDocRef = doc(collection(firestoreClient, "users"), user!._id);
+    const name = nameFieldRef!.current!.value
+    updateDoc(userDocRef, {name}).then(() => {
+      dispatch(changeUserValue({ key: "name", value: name }));
+      showToast(`Update name success`, "success");
+      setIsNameEditing(false);
+    })
   }
 
   function onSignout() {
@@ -69,9 +82,24 @@ export function UserDrawer(props: UserDrawerProps) {
             sx={(theme) => ({ backgroundColor: theme.palette.grey[300] })}
             p={1}>
             <Avatar {...stringAvatar(user.name)} />
-            <Stack gap={0}>
-              <Typography variant="body1" fontWeight={700}>{user.name}</Typography>
-              <Typography variant="caption">{user.email}</Typography>
+            {
+              isNameEditing ? (
+                <form onSubmit={onNameFieldSubmit}>
+                  <TextField size="small" inputProps={{ ref: nameFieldRef }} defaultValue={user.name} />
+                </form>
+              ) : (
+                <Stack gap={0}>
+                  <Typography variant="body1" fontWeight={700}>{user.name}</Typography>
+                  <Typography variant="caption">{user.email}</Typography>
+                </Stack>
+              )
+            }
+            <Stack alignSelf="start">
+              <IconButton size="small" sx={{ width: 16, height: 16 }} onClick={() => {
+                setIsNameEditing((prev) => !prev)
+              }}>
+                <Edit sx={{ width: 16, height: 16 }} />
+              </IconButton>
             </Stack>
           </Stack>
           <Stack
