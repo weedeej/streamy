@@ -1,8 +1,8 @@
-import { LoginModal, MovieCard, HelpModal, UserDrawer, WatchList } from "@/components";
+import { LoginModal, MovieCard, HelpModal, UserDrawer, WatchList, FilterPopup } from "@/components";
 import { useSearch } from "@/hooks";
 import { RootState } from "@/state/store";
 import { Movie, YTSQueryResponse } from "@/types";
-import { AccountCircle, Close, HelpOutline, Login, Menu, Search } from "@mui/icons-material";
+import { AccountCircle, Close, FilterAltOutlined, HelpOutline, Login, Menu, Search } from "@mui/icons-material";
 import { AppBar, Box, CircularProgress, IconButton, Pagination, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
@@ -17,10 +17,11 @@ export default function Home() {
   const [query, setQuery] = useState<string>("");
   const [staticQuery, setStaticQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [updateQuery, search, searchResult, clearResult] = useSearch();
+  const [updateQuery, search, searchResult, clearResult, filters] = useSearch();
   const user = useSelector((state: RootState) => state.auth.user);
   const initialMovies = useSelector((state: RootState) => state.homePageMov.movies);
   const [currentPage, setCurrentPage] = useState(1);
+  const [filterPopoverAnchor, setFilterPopoverAnchor] = useState<Element | null>(null);
 
   // Pagination effect
   useEffect(() => {
@@ -30,11 +31,15 @@ export default function Home() {
     });
   }, [currentPage]);
 
+  function onQueryClose() {
+
+  }
+
   function onLoginClick() {
     setIsLoginModalOpen(true);
   }
 
-  function onQueryUpdate(e: React.ChangeEvent<HTMLInputElement>) {
+  function onQueryTermUpdate(e: React.ChangeEvent<HTMLInputElement>) {
     if (!e.target.value) clearResult();
     updateQuery("query_term", e.target.value);
     updateQuery("page", 1);
@@ -47,6 +52,10 @@ export default function Home() {
 
   function onAccountIconClick() {
     setIsUserDrawerOpen(true);
+  }
+
+  function onFilterClick(e: React.MouseEvent) {
+    setFilterPopoverAnchor(e.currentTarget);
   }
 
   function clearSearch() {
@@ -81,6 +90,7 @@ export default function Home() {
       <UserDrawer isOpen={isUserDrawerOpen} onClose={() => setIsUserDrawerOpen(false)} />
       <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
       <HelpModal isOpen={isHelpModalOpen} onClose={() => setIsHelpModalOpen(false)} />
+      <FilterPopup anchorEl={filterPopoverAnchor} onFilterChange={updateQuery} currentFilters={filters} onClose={() => setFilterPopoverAnchor(null)} />
       <Stack gap={2} minHeight="100vh">
         <AppBar position="static">
           <Toolbar sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
@@ -101,33 +111,33 @@ export default function Home() {
               SSTREAMY
             </Typography>
             <form onSubmit={onSearch}>
-            <TextField
-              variant="outlined"
-              size="small"
-              sx={{
-                borderColor: "white",
-                outlineColor: "white",
-                ".MuiOutlinedInput-notchedOutline": {
-                  borderColor: "white!important",
-                  "&::hover": {
-                    borderColor: "white",
+              <TextField
+                variant="outlined"
+                size="small"
+                sx={{
+                  borderColor: "white",
+                  outlineColor: "white",
+                  ".MuiOutlinedInput-notchedOutline": {
+                    borderColor: "white!important",
+                    "&::hover": {
+                      borderColor: "white",
+                    }
                   }
-                }
-              }}
-              value={query}
-              InputProps={{
-                startAdornment: <Search style={{ stroke: "white", fill: "white" }} />,
-                endAdornment: query ? (
-                  <IconButton onClick={clearSearch}>
-                    <Close fontSize="small"/>
+                }}
+                value={query}
+                InputProps={{
+                  startAdornment: <Search style={{ stroke: "white", fill: "white" }} />,
+                  endAdornment: query ? (
+                    <IconButton onClick={clearSearch}>
+                      <Close fontSize="small" />
                     </IconButton>
-                ) : <></>,
-                sx: {
-                  color: "white"
-                }
-              }}
-              onChange={onQueryUpdate}
-              placeholder="Search" />
+                  ) : <></>,
+                  sx: {
+                    color: "white"
+                  }
+                }}
+                onChange={onQueryTermUpdate}
+                placeholder="Search" />
             </form>
             <Box sx={{ flexGrow: 1 }} />
             <Stack direction="row" gap={2}>
@@ -154,15 +164,23 @@ export default function Home() {
         </AppBar>
         <Stack p={0}>
           <WatchList />
-          <WatchList isPublicWatchList/>
+          <WatchList isPublicWatchList />
           {
             ((searchResult?.data.movie_count ?? 0 > 0)) ? (<Stack alignItems="center" flexWrap="wrap" px={4} pt={2} direction="row" justifyContent="space-between">
               <Typography variant="body2">Showing {searchResult!.data.movies.length} out of {searchResult!.data.movie_count}</Typography>
-              {pageCount > 1 && <Pagination
-                count={Math.ceil(pageCount)}
-                color="primary"
-                onChange={onPageChange}
-              />}
+
+              <Stack direction="row" gap={1}>
+                <IconButton size="small" onClick={onFilterClick}>
+                  <FilterAltOutlined/>
+                </IconButton>
+                {
+                  pageCount > 1 && <Pagination
+                    count={Math.ceil(pageCount)}
+                    color="primary"
+                    onChange={onPageChange}
+                  />
+                }
+              </Stack>
             </Stack>) : <></>
           }
           <Stack p={4} direction="row" flexWrap="wrap" gap={2} alignItems="stretch" justifyContent="space-evenly" height="100%">
@@ -196,7 +214,7 @@ function MainContent(props: { query: string, result: YTSQueryResponse | null, in
       <CircularProgress />
     </Stack>
   );
-  
+
   if (query) {
     if (result !== null) {
       if (result.data.movie_count < 1) {

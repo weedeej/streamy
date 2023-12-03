@@ -4,7 +4,7 @@ import { showToast } from "@/utils";
 import axios from "axios";
 import { useState } from "react";
 
-export function useSearch(cb?: (result: YTSQueryResponse | null) => void): [(key: keyof typeof query, value: any) => void, () => Promise<void>, YTSQueryResponse | null, () => void] {
+export function useSearch(cb?: (result: YTSQueryResponse | null) => void): [(key: keyof typeof query, value: any) => void, () => Promise<void>, YTSQueryResponse | null, () => void, ListMoviesParam] {
   const [query, setQuery] = useState<ListMoviesParam>(defaultQueryParam);
   const [searchResult, setSearchResult] = useState<YTSQueryResponse | null>(null);
 
@@ -33,5 +33,5 @@ export function useSearch(cb?: (result: YTSQueryResponse | null) => void): [(key
     cb?.(response);
   }
 
-  return [updateQuery, search, searchResult, clearResult]
+  return [updateQuery, search, searchResult, clearResult, query]
 }
