@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   env: {
-    IS_LOCAL: process.env.IS_LOCAL
+    baseUrl: process.env.IS_LOCAL ? "http://localhost:3000" : "https://sstreamy.vercel.app"
   },
   reactStrictMode: true,
 }
