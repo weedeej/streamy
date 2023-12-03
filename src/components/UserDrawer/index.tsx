@@ -3,7 +3,7 @@ import { authClient, firestoreClient } from "@/firebaseConfig/firebase";
 import { changeUserValue, setUser } from "@/state/auth/authSlice";
 import { RootState } from "@/state/store";
 import { showToast, stringAvatar } from "@/utils";
-import { CopyAll, Edit } from "@mui/icons-material";
+import { CopyAll, Edit, Loop, Refresh } from "@mui/icons-material";
 import { Avatar, Button, Card, CardHeader, CircularProgress, Drawer, IconButton, Paper, Stack, Switch, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import { doc, collection, updateDoc } from "firebase/firestore";
@@ -33,36 +33,49 @@ export function UserDrawer(props: UserDrawerProps) {
     showToast("Link Copied!", "success");
   }
 
-  async function onPublicSwitchChange(e: ChangeEvent, isChecked: boolean) {
+  async function onPublicSwitchChange(e: any, isChecked: boolean) {
     const accessToken = firebaseUser!.stsTokenManager!.accessToken;
 
     setIsSwitchLoading(true);
-    axios.post(`${httpConfig.uri}/api/users/${user!._id}/watchList/update`, {
-      isPublic: isChecked
-    }, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-        Accept: "application/json"
-      }
-    }).then(() => {
-      const userDocRef = doc(collection(firestoreClient, "users"), user!._id);
-      updateDoc(userDocRef, { isWatchlistPublic: isChecked }).then(() => {
-        dispatch(changeUserValue({ key: "isWatchlistPublic", value: isChecked }));
-        showToast(`Watchlist has been made ${isChecked ? "public" : "private"}`, "success");
-        setIsSwitchLoading(false);
-      })
+    const promiseHelper = new Promise((res, reject) => {
+      axios.post(`${httpConfig.uri}/api/users/${user!._id}/watchList/update`, {
+        isPublic: isChecked
+      }, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+          Accept: "application/json"
+        }
+      }).then(() => {
+        const userDocRef = doc(collection(firestoreClient, "users"), user!._id);
+        updateDoc(userDocRef, { isWatchlistPublic: isChecked }).then(() => {
+          dispatch(changeUserValue({ key: "isWatchlistPublic", value: isChecked }));
+          showToast(`Watchlist has been made ${isChecked ? "public" : "private"}`, "success");
+          setIsSwitchLoading(false);
+          res(true);
+        })
+      });
     });
+    return promiseHelper;
   }
 
   function onNameFieldSubmit(e: FormEvent) {
     e.preventDefault();
     const userDocRef = doc(collection(firestoreClient, "users"), user!._id);
     const name = nameFieldRef!.current!.value
-    updateDoc(userDocRef, {name}).then(() => {
+    updateDoc(userDocRef, { name }).then(() => {
       dispatch(changeUserValue({ key: "name", value: name }));
       showToast(`Update name success`, "success");
       setIsNameEditing(false);
+    })
+  }
+
+  function refreshPublicList() {
+    if (!user?.isWatchlistPublic) return;
+    onPublicSwitchChange(null, false).then(() => {
+      onPublicSwitchChange(null, true).then(() => {
+        showToast(`Watchlist update success`, "success");
+      })
     })
   }
 
@@ -112,9 +125,14 @@ export function UserDrawer(props: UserDrawerProps) {
               justifyContent="space-between"
               alignItems="center"
             >
-              <Typography variant="body1">
-                Public Watchlist (NOT WORKING)
-              </Typography>
+              <Stack direction="row" gap={0.5} alignItems="center">
+                <Typography variant="body1">
+                  Public Watchlist
+                </Typography>
+                <IconButton size="small" onClick={refreshPublicList} title="Update public watchlist">
+                  <Loop fontSize="small" />
+                </IconButton>
+              </Stack>
               <Stack direction="row" gap={1} alignItems="center">
                 {isSwitchLoading && <CircularProgress size={16} />}
                 <Switch checked={user.isWatchlistPublic} onChange={onPublicSwitchChange} disabled={isSwitchLoading} />
