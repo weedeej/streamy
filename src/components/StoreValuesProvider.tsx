@@ -1,5 +1,5 @@
 import { authClient, firestoreClient } from "@/firebaseConfig/firebase";
-import { setFirebaseUser, setUser } from "@/state/auth/authSlice";
+import { changeUserValue, setFirebaseUser, setUser } from "@/state/auth/authSlice";
 import { setHomePageMov } from "@/state/homePageMov/homePageMovSlice";
 import { RootState } from "@/state/store";
 import { setTrackers } from "@/state/trackerList/trackerListSlice";
@@ -29,7 +29,9 @@ export function StoreValuesProvider(props: any) {
     return onSnapshot((collection(userDocRef, `watchList`)), 
       (snap) => {
         dispatch(setWatchList(snap.docs.map(d => d.data() as Movie)));
-        updateDoc(userDocRef, {watchListCount: snap.size});
+        updateDoc(userDocRef, {watchListCount: snap.size}).then(() => {
+          dispatch(changeUserValue({key: "watchListCount", value: snap.size}))
+        });
       });
   }, [user]);
 
