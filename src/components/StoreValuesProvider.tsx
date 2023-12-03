@@ -19,13 +19,13 @@ export function StoreValuesProvider(props: any) {
   
   const isTrackerListDefault = useSelector((state: RootState) => state.trackerList.default);
   const homePageMovies = useSelector((state: RootState) => state.homePageMov.movies);
-  const user = useSelector((state: RootState) => state.auth.user);
+  const firebaseUser = useSelector((state: RootState) => state.auth.firebaseUser);
   const dispatch = useDispatch();
 
   // Effect for watch list
   useEffect(() => {
-    if (!user) return;
-    const userDocRef = doc(firestoreClient, `/users/${user._id}`);
+    if (!firebaseUser) return;
+    const userDocRef = doc(firestoreClient, `/users/${firebaseUser.uid}`);
     return onSnapshot((collection(userDocRef, `watchList`)), 
       (snap) => {
         dispatch(setWatchList(snap.docs.map(d => d.data() as Movie)));
@@ -33,7 +33,7 @@ export function StoreValuesProvider(props: any) {
           dispatch(changeUserValue({key: "watchListCount", value: snap.size}))
         });
       });
-  }, [user]);
+  }, [firebaseUser]);
 
   // Effect for trckers
   useEffect(() => {
