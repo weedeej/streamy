@@ -39,7 +39,7 @@ export function FilterPopup(props: FilterPopupProps) {
                     </Typography>
                     <Select size="small" value={quality} onChange={(e) => onFilterChange("quality", e.target.value)}>
                         {
-                            Object.values(MovieQuality).map((v) => <MenuItem value={v}>{v}</MenuItem>)
+                            Object.values(MovieQuality).map((v) => <MenuItem key={`filterQ_${v}`} value={v}>{v}</MenuItem>)
                         }
                     </Select>
                 </Stack>
@@ -49,7 +49,7 @@ export function FilterPopup(props: FilterPopupProps) {
                     </Typography>
                     <Select size="small" value={sort_by} onChange={(e) => onFilterChange("sort_by", e.target.value)}>
                         {
-                            Object.entries(SortList).map(([k, v]) => <MenuItem value={v}>{k}</MenuItem>)
+                            Object.entries(SortList).map(([k, v]) => <MenuItem key={`filterSort_${k}`} value={v}>{k}</MenuItem>)
                         }
                     </Select>
                 </Stack>
