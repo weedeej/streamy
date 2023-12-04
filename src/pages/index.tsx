@@ -83,6 +83,17 @@ export default function Home() {
     setCurrentPage(() => page);
   }
 
+  function onFilterClose() {
+    if (!!searchResult) {
+      setIsLoading(true);
+      search().then(() => {
+        setIsLoading(false);
+        setStaticQuery(query)
+      })
+    }
+    setFilterPopoverAnchor(null);
+  }
+
   const pageCount = (searchResult?.data.movie_count ?? 0) / (searchResult?.data.limit ?? 0);
 
   return (
@@ -90,7 +101,7 @@ export default function Home() {
       <UserDrawer isOpen={isUserDrawerOpen} onClose={() => setIsUserDrawerOpen(false)} />
       <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
       <HelpModal isOpen={isHelpModalOpen} onClose={() => setIsHelpModalOpen(false)} />
-      <FilterPopup anchorEl={filterPopoverAnchor} onFilterChange={updateQuery} currentFilters={filters} onClose={() => setFilterPopoverAnchor(null)} />
+      <FilterPopup anchorEl={filterPopoverAnchor} onFilterChange={updateQuery} currentFilters={filters} onClose={onFilterClose} />
       <Stack gap={2} minHeight="100vh">
         <AppBar position="static">
           <Toolbar sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
@@ -111,33 +122,38 @@ export default function Home() {
               SSTREAMY
             </Typography>
             <form onSubmit={onSearch}>
-              <TextField
-                variant="outlined"
-                size="small"
-                sx={{
-                  borderColor: "white",
-                  outlineColor: "white",
-                  ".MuiOutlinedInput-notchedOutline": {
-                    borderColor: "white!important",
-                    "&::hover": {
-                      borderColor: "white",
+              <Stack direction="row" gap={1}>
+                <TextField
+                  variant="outlined"
+                  size="small"
+                  sx={{
+                    borderColor: "white",
+                    outlineColor: "white",
+                    ".MuiOutlinedInput-notchedOutline": {
+                      borderColor: "white!important",
+                      "&::hover": {
+                        borderColor: "white",
+                      }
                     }
-                  }
-                }}
-                value={query}
-                InputProps={{
-                  startAdornment: <Search style={{ stroke: "white", fill: "white" }} />,
-                  endAdornment: query ? (
-                    <IconButton onClick={clearSearch}>
-                      <Close fontSize="small" />
-                    </IconButton>
-                  ) : <></>,
-                  sx: {
-                    color: "white"
-                  }
-                }}
-                onChange={onQueryTermUpdate}
-                placeholder="Search" />
+                  }}
+                  value={query}
+                  InputProps={{
+                    startAdornment: <Search style={{ stroke: "white", fill: "white" }} />,
+                    endAdornment: query ? (
+                      <IconButton onClick={clearSearch}>
+                        <Close fontSize="small" />
+                      </IconButton>
+                    ) : <></>,
+                    sx: {
+                      color: "white"
+                    }
+                  }}
+                  onChange={onQueryTermUpdate}
+                  placeholder="Search" />
+                <IconButton size="small" onClick={onFilterClick}>
+                  <FilterAltOutlined sx={{fill: "white"}}/>
+                </IconButton>
+              </Stack>
             </form>
             <Box sx={{ flexGrow: 1 }} />
             <Stack direction="row" gap={2}>
@@ -170,9 +186,6 @@ export default function Home() {
               <Typography variant="body2">Showing {searchResult!.data.movies.length} out of {searchResult!.data.movie_count}</Typography>
 
               <Stack direction="row" gap={1}>
-                <IconButton size="small" onClick={onFilterClick}>
-                  <FilterAltOutlined/>
-                </IconButton>
                 {
                   pageCount > 1 && <Pagination
                     count={Math.ceil(pageCount)}
