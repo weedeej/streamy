@@ -3,7 +3,7 @@ import { useSearch } from "@/hooks";
 import { RootState } from "@/state/store";
 import { Movie, YTSQueryResponse } from "@/types";
 import { stringAvatar } from "@/utils";
-import { AccountCircle, Close, FilterAltOutlined, HelpOutline, Login, Menu, Search } from "@mui/icons-material";
+import { Close, FilterAltOutlined, HelpOutline, Login, Menu, Search } from "@mui/icons-material";
 import { AppBar, Avatar, Box, CircularProgress, IconButton, Pagination, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
@@ -180,7 +180,7 @@ export default function Home() {
           </Toolbar>
         </AppBar>
         <Stack p={0} pt={10}>
-          <WatchList />
+          {!!user && <WatchList />}
           <WatchList isPublicWatchList />
           {
             ((searchResult?.data.movie_count ?? 0 > 0)) ? (<Stack alignItems="center" flexWrap="wrap" px={4} pt={2} direction="row" justifyContent="space-between">
