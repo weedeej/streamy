@@ -16,7 +16,8 @@ const trackerListSlice = createSlice({
   initialState,
   reducers: {
     setTrackers: (state, action: PayloadAction<trackerListState>) => {
-      state = action.payload;
+      state = {...action.payload}
+      return state;
     }
   }
 });

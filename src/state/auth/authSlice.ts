@@ -22,9 +22,11 @@ const authSlice = createSlice({
   reducers: {
     setUser: (state, action: PayloadAction<StreamyUser | null>) => {
       state.user = action.payload
+      return state;
     },
     setFirebaseUser: (state, action: PayloadAction<FirebaseUserObject | null>) => {
       state.firebaseUser = action.payload;
+      return state;
     },
     changeUserValue: (state, action: PayloadAction<{key: keyof StreamyUser, value: any}>) => {
       if (!state.user) return;
@@ -33,6 +35,7 @@ const authSlice = createSlice({
       // @ts-ignore
       user[key] = value;
       state.user = user;
+      return state;
     }
   }
 });

@@ -56,6 +56,7 @@ export function StoreValuesProvider(props: any) {
     authClient.onAuthStateChanged(async (user) => {
       if (!user) {
         dispatch(setFirebaseUser(null));
+        dispatch(setWatchList([]));
         return dispatch(setUser(null));
       }
       if (!user.emailVerified) {

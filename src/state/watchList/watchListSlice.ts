@@ -18,12 +18,15 @@ const watchListSlice = createSlice({
   reducers: {
     addMovie: (state, action: PayloadAction<Movie>) => {
       state.watchList = [...state.watchList, action.payload];
+      return state;
     },
     removeMovie: (state, action: PayloadAction<{id: string, title: string}>) => {
       state.watchList = state.watchList.filter((m) => m.id !== action.payload.id);
+      return state;
     },
     setWatchList: (state, action: PayloadAction<Movie[]>) => {
       state.watchList = action.payload;
+      return state;
     }
   }
 });

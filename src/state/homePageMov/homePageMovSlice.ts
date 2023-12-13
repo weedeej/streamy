@@ -15,6 +15,7 @@ const slice = createSlice({
   reducers: {
     setHomePageMov: (state, action: PayloadAction<homePageMovState>) => {
       state.movies = action.payload.movies;
+      return state;
     }
   }
 })
