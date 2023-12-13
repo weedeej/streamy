@@ -103,7 +103,7 @@ export default function Home() {
       <HelpModal isOpen={isHelpModalOpen} onClose={() => setIsHelpModalOpen(false)} />
       <FilterPopup anchorEl={filterPopoverAnchor} onFilterChange={updateQuery} currentFilters={filters} onClose={onFilterClose} />
       <Stack gap={2} minHeight="100vh">
-        <AppBar position="static">
+        <AppBar position="fixed">
           <Toolbar sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
             <IconButton
               size="large"
@@ -178,7 +178,7 @@ export default function Home() {
             </Stack>
           </Toolbar>
         </AppBar>
-        <Stack p={0}>
+        <Stack p={0} pt={10}>
           <WatchList />
           <WatchList isPublicWatchList />
           {
