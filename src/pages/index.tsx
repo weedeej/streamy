@@ -2,8 +2,9 @@ import { LoginModal, MovieCard, HelpModal, UserDrawer, WatchList, FilterPopup } 
 import { useSearch } from "@/hooks";
 import { RootState } from "@/state/store";
 import { Movie, YTSQueryResponse } from "@/types";
+import { stringAvatar } from "@/utils";
 import { AccountCircle, Close, FilterAltOutlined, HelpOutline, Login, Menu, Search } from "@mui/icons-material";
-import { AppBar, Box, CircularProgress, IconButton, Pagination, Stack, TextField, Toolbar, Typography } from "@mui/material";
+import { AppBar, Avatar, Box, CircularProgress, IconButton, Pagination, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -169,11 +170,11 @@ export default function Home() {
               <IconButton
                 size="large"
                 edge="end"
-                onClick={!user ? onLoginClick : onAccountIconClick}
                 color="inherit"
+                onClick={!user ? onLoginClick : onAccountIconClick}
                 title="User"
               >
-                {user ? <AccountCircle /> : <Login />}
+                {user ? <Avatar {...stringAvatar(user.name)} sx={{ width: 24, height: 24 }}/> : <Login/>}
               </IconButton>
             </Stack>
           </Toolbar>
